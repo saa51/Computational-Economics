@@ -2,7 +2,7 @@ import numpy as np
 from scipy.stats import norm
 from numpy.polynomial import hermite
 
-epsilon = 1e-6
+epsilon = 1e-8
 
 
 class MarkovApprox:
@@ -40,7 +40,14 @@ class Rowenhorst(MarkovApprox):
 
 
 class Tauchen(MarkovApprox):
-    def approx(self, n, m):
+    def approx(self, n, m=None):
+        __tauchen_omega_dict = {
+            5: 1.6425,
+            25: 2.5107,
+            10: 1.9847
+        }
+        if m is None:
+            m = __tauchen_omega_dict.get(n, 3)
         grids = np.linspace(self.mean_z - m * self.sigma_z, self.mean_z + m * self.sigma_z, n, endpoint=True)
         w = 2 * m * self.sigma_z / (n - 1)
         trans_mat = np.zeros((n, n))
@@ -68,7 +75,7 @@ class TauchenHussey(MarkovApprox):
             for j in range(n):
                 prob_mu = norm.pdf((grids[j] - self.mean_z) / self.sigma_e)
                 prob_z = norm.pdf((grids[j] - (1 - self.rho) * self.mean_z - self.rho * grids[i]) / self.sigma_e)
-                trans_mat[i][j] = weights[j] / prob_mu * prob_z + epsilon
+                trans_mat[i][j] = weights[j] / (prob_mu + epsilon) * prob_z + epsilon
         sum_vec = np.sum(trans_mat, axis=1)
         for i in range(n):
             for j in range(n):
@@ -76,6 +83,23 @@ class TauchenHussey(MarkovApprox):
         self.grids = grids
         self.trans_mat = trans_mat
         return grids, trans_mat
+
+
+def markov_moments(grids, trans_mat):
+    dist = np.ones(grids.size) / grids.size
+    old_dist = np.zeros(grids.size)
+    while not np.allclose(dist, old_dist):
+        old_dist = np.copy(dist)
+        dist = np.dot(dist.reshape(1, -1), trans_mat).ravel()
+    mean_a = np.sum(dist * grids)
+    sigma_a = np.sqrt(np.sum(grids * grids * dist) - mean_a * mean_a)
+
+    a_aprime = np.kron(grids.reshape((-1, 1)), grids.reshape((1, -1)))
+    rho = np.sum(a_aprime * (trans_mat * dist)) / np.sum(grids * grids * dist)
+
+    epsilon = -rho * grids.reshape((-1, 1)) + grids.reshape((1, -1))
+    sigma_e = np.sqrt(np.sum(epsilon * epsilon * trans_mat))
+    return [rho, sigma_e, sigma_a]
 
 
 if __name__ == '__main__':
