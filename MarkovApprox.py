@@ -57,7 +57,7 @@ class Tauchen(MarkovApprox):
                 lower = norm.cdf((grids[j] - w / 2 - (1 - self.rho) * self.mean_z - self.rho * grids[i]) / self.sigma_e)
                 if j == 0:
                     trans_mat[i][j] = upper
-                if j == n - 1:
+                elif j == n - 1:
                     trans_mat[i][j] = 1 - lower
                 else:
                     trans_mat[i][j] = upper - lower
@@ -98,7 +98,7 @@ def markov_moments(grids, trans_mat):
     rho = np.sum(a_aprime * (trans_mat * dist)) / np.sum(grids * grids * dist)
 
     epsilon = -rho * grids.reshape((-1, 1)) + grids.reshape((1, -1))
-    sigma_e = np.sqrt(np.sum(epsilon * epsilon * trans_mat))
+    sigma_e = np.sqrt(np.sum(epsilon * epsilon * (trans_mat.transpose() * dist).transpose()))
     return [rho, sigma_e, sigma_a]
 
 

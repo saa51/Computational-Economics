@@ -131,7 +131,7 @@ class OptimalGrowthEnv:
 
         while not np.allclose(policy_func.weights, old_weights, atol=self.tol):
             new_policy = np.zeros((n_k, n_a))
-            # print(np.sum(np.abs(policy_func.weights - old_weights)))
+            print('Policy Loss:', np.sum(np.abs(policy_func.weights - old_weights)))
             old_weights = np.copy(policy_func.weights)
 
             for i, k in enumerate(k_grids):
@@ -140,7 +140,8 @@ class OptimalGrowthEnv:
                     k_prime = self.k_new(k, a, c)
 
                     if k_prime < self.k_ss - k_width:
-                        new_policy[i][j] = np.log(self.resource(k, a) - self.k_ss + k_width - 1e-6)
+                        #new_policy[i][j] = np.log(self.resource(k, a) - self.k_ss + k_width - 1e-6)
+                        new_policy[i][j] = np.log(self.resource(k, a) - k)
                         continue
                     if k_prime > self.k_ss + k_width:
                         new_policy[i][j] = np.log(self.resource(k, a) - self.k_ss - k_width + 1e-6)
@@ -165,7 +166,7 @@ class OptimalGrowthEnv:
         old_weights = np.random.random((1, n_k * n_a))
         new_values = np.zeros((n_k, n_a))
         while not np.allclose(value_func.weights, old_weights, atol=self.tol, rtol=self.tol):
-            # print(np.sum(np.abs(value_func.weights - old_weights)))
+            print('Value Loss:', np.sum(np.abs(value_func.weights - old_weights)))
             old_weights = np.copy(value_func.weights)
             k_grids, a_grids = value_func.real_grids()
             for i, k in enumerate(k_grids):
@@ -199,10 +200,10 @@ class OptimalGrowthEnv:
                 for idxk, k in enumerate(k_grids):
                     c_grids[idxk] = np.exp(self.policy_func_cheby.eval(k, a))
                 k_prime = self.k_new(k_grids, a, c_grids)
-                plt.plot(k_grids, k_prime, label=str(round(a, 1)))
+                plt.plot(k_grids, k_prime, label=str(round(a, 2)))
                 plt.scatter(self.k_grids, self.policy_func[:, idxa], color='red')
             else:
-                plt.plot(self.k_grids, self.policy_func[:, idxa], label=str(round(a, 1)))
+                plt.plot(self.k_grids, self.policy_func[:, idxa], label=str(round(a, 2)))
         plt.plot(self.k_grids, self.k_grids, label='45 degree')
         plt.scatter([self.k_ss], [self.k_ss])
         plt.legend()

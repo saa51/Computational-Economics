@@ -11,23 +11,20 @@ import numpy as np
 
 def question_1():
     # Question 1
-    growth = OptimalGrowthEnv({'tol': 1e-6, 'beta': 0.8})
+    growth = OptimalGrowthEnv({'tol': 1e-5})
     growth.print_steady_state()
 
     # Question 1(b)
-
-    growth.grid_search(15, growth.k_ss * 0.5, 25, 0.01, n_threads=8)
+    growth.grid_search(15, growth.k_ss * 0.5, 7, 0.01, n_threads=8)
     growth.plot_policy(True)
     growth.plot_value(True)
     growth.plot_consumption(True)
 
     # Question 1(c)
-
     growth.euler_method(15, growth.k_ss * 0.5, 7)
     growth.plot_policy(True)
     growth.plot_value(True)
     growth.plot_consumption(True)
-    
 
     # Question 1(d)
     methods = ['T', 'TH', 'R']
@@ -36,7 +33,7 @@ def question_1():
     moments = []
     for method, grid_num in product(methods, grid_nums):
         print('Euler method:', method, grid_num)
-        growth.euler_method(25, growth.k_ss * 0.75, grid_num, method)
+        growth.euler_method(25, growth.k_ss * 0.95, grid_num, method)
         print('Simulating...')
         simu_data = growth.simulation(a_series=a_series)
 
@@ -100,5 +97,5 @@ def question_3():
 
 if __name__ == '__main__':
     question_1()
-    #question_2()
+    question_2()
     #question_3()
