@@ -14,7 +14,9 @@ default_params = {
     'beta': 0.99,
     'alpha': 0.5,
     'b': 0.01,
-    'phi': 0.005
+    'phi': 0.005,
+    'rho': 0.95,
+    'sigma': 0.02
 }
 
 
@@ -28,6 +30,8 @@ class GrowthWithHabitIACEnv:
         self.delta = params.get('delta', default_params['delta'])
         self.b = params.get('b', default_params['b'])
         self.phi = params.get('phi', default_params['phi'])
+        self.rho = params.get('rho', default_params['rho'])
+        self.sigma = params.get('sigma', default_params['sigma'])
         self.k_ss, self.i_ss, self.c_ss, self.lamda_ss, self.mu_ss = 0, 0, 0, 0, 0
 
         self.policy_func = None
@@ -60,96 +64,173 @@ class GrowthWithHabitIACEnv:
         else:
             print('Fail to solve steady state:', result.flag)
 
-    def pea(self, k_min, k_max, atol=1e-6, order=1, simulation=6000, buried=500):
+    def pea(self, atol=1e-6, order=1, simulation=20500, buried=500, max_iter=5000, init_weight=None, lr=0.1, iri=False):
         if self.k_ss == 0:
             self.solve_steady_state()
-        k_width = max(self.k_ss - k_min, k_max - self.k_ss)
+        k_width = self.k_ss / 2
         c_width = self.c_ss / 2
 
-        lamda_func = ExpLogLinearApprox(3, order)
-        mu_func = ExpLogLinearApprox(3, order)
+        # mu_func = ExpLogLinearApprox(3, order)
+        mu_func = ExpLogLinearApprox(2, order)
+        if init_weight is None:
+            k_grids = np.linspace(self.k_ss - k_width, self.k_ss + k_width, 50, endpoint=True)
+            # c_grids = np.linspace(self.c_ss - c_width, self.c_ss + c_width, 50, endpoint=True)
+            a_grids = np.linspace(np.exp(-5), np.exp(5), 50, endpoint=True)
+            # x = np.array([[c, k, a] for k, c, a in product(k_grids, c_grids, a_grids)])
+            x = np.array([[k, a] for k, a in product(k_grids, a_grids)])
+            mu_ss = (self.c_ss - self.b * self.c_ss) ** (-self.gamma)
+            mu_func.approx(x, mu_ss * np.ones(x.shape[0]))
+        else:
+            weight = mu_func.get_weights()
+            for idx in range(len(init_weight)):
+                weight[idx] = init_weight[idx]
 
-        k_grids = np.linspace(self.k_ss - k_width, self.k_ss + k_width, 50, endpoint=True)
-        c_grids = np.linspace(self.c_ss - c_width, self.c_ss + c_width, 50, endpoint=True)
-        a_grids = np.linspace(np.exp(-5), np.exp(5), 50, endpoint=True)
-        x = np.array([[k, c, a] for k, c, a in product(k_grids, c_grids, a_grids)])
-
-        lamda_func.approx(x, self.lamda_ss * np.ones(x.shape[0]) + np.random.uniform(-1, 1, x.shape[0]) * self.lamda_ss / 20 * 0)
-        mu_func.approx(x, self.mu_ss * np.ones(x.shape[0]) + np.random.uniform(-1, 1, x.shape[0]) * self.mu_ss / 5)
-
-        old_weight_mu = np.random.random(mu_func.get_weights().shape)
-        old_weight_lamda = np.random.random(lamda_func.get_weights().shape)
+        old_weight = np.random.random(mu_func.get_weights().shape)
         iter = 0
-        while not (np.allclose(old_weight_mu, mu_func.get_weights(), atol=atol) and np.allclose(old_weight_lamda, lamda_func.get_weights(), atol=atol)):
+        r_squares = []
+        weights = []
+        losses = []
+        c_series = np.zeros(simulation + 3)
+        k_series = np.zeros(simulation + 3)
+        i_series = np.zeros(simulation + 3)
+        mu_series = np.zeros(simulation + 3)
+        a_series = np.zeros(simulation + 3)
+
+        eta_series = np.zeros(simulation + 3)
+        while not (np.allclose(old_weight, mu_func.get_weights(), atol=atol)):
+            if iter > max_iter:
+                break
             iter += 1
-            old_weight_mu = np.copy(mu_func.get_weights())
-            old_weight_lamda = np.copy(lamda_func.get_weights())
+            old_weight = np.copy(mu_func.get_weights())
 
-            c_series = np.zeros(simulation + 1)
-            k_series = np.zeros(simulation + 1)
-            i_series = np.zeros(simulation + 1)
-            mu_series = np.zeros(simulation + 1)
-            lamda_series = np.zeros(simulation + 1)
-            a_series = AR1Process(0.8, err_params={'sigma': 0.1}).simulate(simulation, 0)
-
-            c_series[0] = self.c_ss + (2 * np.random.rand() - 1) * c_width * 0
-            k_series[1] = self.k_ss + (2 * np.random.rand() - 1) * k_width * 0
-            for t in range(1, simulation):
-                mu = mu_func.eval([[c_series[t - 1], k_series[t], np.exp(a_series[t])]])
-                #print([c_series[t - 1], k_series[t], np.exp(a_series[t])])
-                lamda = lamda_func.eval([[c_series[t - 1], k_series[t], np.exp(a_series[t])]])
-                #print('mu', mu, 'lamda', lamda, (mu/lamda-1)/self.phi)
-                i = (mu / lamda - 1) / self.phi
+            a_series = AR1Process(self.rho, err_params={'sigma': self.sigma}).simulate(simulation + 2, 0)
+            c_series[0] = self.c_ss
+            k_series[1] = self.k_ss
+            for t in range(1, simulation + 2):
+                y = np.exp(a_series[t]) * k_series[t] ** self.alpha
+                # mu = mu_func.eval([[c_series[t - 1], k_series[t], np.exp(a_series[t])]])
+                #print(t, [c_series[t - 1], k_series[t], np.exp(a_series[t])])
+                mu = mu_func.eval([[k_series[t], np.exp(a_series[t])]])
+                c = mu ** (-1 / self.gamma) + self.b * c_series[t - 1]
+                if k_series[t] > 1 / (self.phi * (1 - self.delta)):
+                    #print('there', c, y)
+                    c = min(c, y + 0.5 / self.phi - 0.5)
+                else:
+                    #print('here', t, k_series[t], c, y + k_series[t] * (1 - self.delta) - 0.5 * self.phi * (1 - self.delta) ** 2 * k_series[t] ** 2 - 1e-6)
+                    c = min(c, y + k_series[t] * (1 - self.delta) - 0.5 * self.phi * (1 - self.delta) ** 2 * k_series[t] ** 2 - 0.5)
+                if iri:
+                    c = min(c, y)
+                #print(t, self.phi, c, y, 1 + 2 * self.phi * (y - c))
+                i = (np.sqrt(1 + 2 * self.phi * (y - c)) - 1) / self.phi
                 k_prime = (1 - self.delta) * k_series[t] + i
-
-                #k_prime = max(k_prime, self.k_ss - k_width)
-                #k_prime = min(k_prime, self.k_ss + k_width)
-                i = k_prime - k_series[t] * (1 - self.delta)
-                c = np.exp(a_series[t]) * k_series[t] ** self.alpha - i - self.phi * i * i / 2
-                while c < self.b * c_series[t - 1]+1:
-                    i = i - 1
-                    c = np.exp(a_series[t]) * k_series[t] ** self.alpha - i - self.phi * i * i / 2
-                k_prime = (1 - self.delta) * k_series[t] + i
+                eta = (c - self.b * c_series[t - 1]) ** (-self.gamma) - mu
+                mu = (c - self.b * c_series[t - 1]) ** (-self.gamma)
                 i_series[t] = i
                 c_series[t] = c
                 mu_series[t] = mu
-                lamda_series[t] = lamda
                 k_series[t + 1] = k_prime
+                eta_series[t] = eta
 
-            print('Var c:', np.var(c_series[buried:-buried]))
-            print('Var k:', np.var(k_series[buried:-buried]))
-            if np.var(k_series[buried:-buried]) == np.nan:
+            # print('Var c:', np.var(c_series[buried:]))
+            # print('Var k:', np.var(k_series[buried:]))
+            if np.isnan(np.var(k_series[buried:])):
                 break
-            #print(i_series)
-            plt.plot(c_series / self.c_ss, label='c')
-            plt.plot(i_series / self.i_ss, label='i')
-            #plt.plot(np.exp(a_series), label='a')
-            plt.legend()
-            plt.title('Iterations ' + str(iter))
-            plt.show()
+            #print(i_series, k_series, c_series)
+            plot = False
+            if plot and iter % 500 == 0:
+                plt.figure(1)
+                plt.subplot(411)
+                plt.plot(c_series[1:-1] / self.c_ss, label='c')
+                plt.subplot(412)
+                plt.plot(i_series[1:-1] / self.i_ss, label='i')
+                plt.subplot(413)
+                plt.plot(k_series[1:-1] / self.k_ss, label='k')
+                plt.subplot(414)
+                plt.plot(np.exp(a_series[1:-1]), label='a')
+                #plt.legend()
+                #plt.title('Iterations ' + str(iter))
+                plt.show()
+            #print(mu_series)
+            '''
+            for t in range(simulation - 1, 0, -1):
+                r_prime = self.alpha * np.exp(a_series[t + 1]) * k_series[t + 1] ** (self.alpha - 1)
+                mic = 1 + self.phi * i_series[t]    # marginal investment cost
+                mic_prime = 1 + self.phi * i_series[t + 1]
+                lamda_prime = mu_series[t + 1] - self.beta * self.b * mu_series[t + 2]  # shadow price of output
+                mu_series[t] = self.beta * (self.b * mu_series[t + 1] + (r_prime + (1 - self.delta) * mic_prime) * lamda_prime / mic)
+            '''
+            for t in range(simulation):
+                r_prime = self.alpha * np.exp(a_series[t + 1]) * k_series[t + 1] ** (self.alpha - 1)
+                mic = 1 + self.phi * i_series[t]  # marginal investment cost
+                mic_prime = 1 + self.phi * i_series[t + 1]
+                lamda_prime = mu_series[t + 1] - self.beta * self.b * mu_series[t + 2]  # shadow price of output
+                mu_series[t] = self.beta * (
+                            self.b * mu_series[t + 1] + (r_prime + (1 - self.delta) * mic_prime) * lamda_prime / mic - (1 - self.delta) * eta_series[t + 1])
 
-            r_series = np.zeros(simulation + 1)
-            for t in range(2, simulation - int(buried / 2)):
-                lamda_series[t] = (c_series[t] - self.b * c_series[t - 1]) ** (-self.gamma) - self.beta * self.b * (c_series[t + 1] - self.b * c_series[t]) ** (-self.gamma)
-                r_series[t + 1] = self.alpha * np.exp(a_series[t + 1]) * k_series[t + 1] ** (self.alpha - 1)
-                mu_series[t] = self.beta * (r_series[t + 1] * lamda_series[t + 1] + mu_series[t + 1] * (1 - self.delta))
-            plt.plot(mu_series / self.mu_ss, label='mu')
-            plt.plot(lamda_series / self.lamda_ss, label='lamda')
-            plt.plot(r_series, label='r')
-            #plt.plot(np.exp(a_series), label='a')
-            plt.legend()
-            plt.title('Iterations ' + str(iter))
-            plt.show()
-
-            state_variables = np.stack([c_series[buried:-buried-1], k_series[buried + 1:-buried], np.exp(a_series[buried + 1:-buried])]).transpose()
-            _, r2_mu = mu_func.approx(state_variables, mu_series[buried + 1:-buried], lr=0.1)
-            _, r2_lamda = lamda_func.approx(state_variables, lamda_series[buried + 1:-buried], lr=0.1)
-            print(mu_func.get_weights(), lamda_func.get_weights())
+            # print(mu_series)
+            '''
+            if plot and iter % 200 == 0:
+                plt.plot(mu_series, label='mu')
+                plt.legend()
+                plt.title('Iterations ' + str(iter))
+                plt.show()
+            '''
+            if np.var(c_series[buried:simulation - 1]) < 1e-3:
+                c_series += np.random.random(c_series.shape) * 0.1 - 0.05
+            # state_variables = np.stack([c_series[buried:simulation - 1], k_series[buried + 1:simulation], np.exp(a_series[buried + 1:simulation])]).transpose()
+            state_variables = np.stack([k_series[buried + 1:simulation], np.exp(a_series[buried + 1:simulation])]).transpose()
+            _, r2 = mu_func.approx(state_variables, mu_series[buried + 1:simulation], lr=lr)
+            #print(mu_func.get_weights())
 
             print('Iterations', iter)
-            print('R^2 of mu:', r2_mu)
-            print('R^2 of lamda:', r2_lamda)
-            print('Loss:', np.linalg.norm(old_weight_mu - mu_func.get_weights()) + np.linalg.norm(old_weight_lamda - lamda_func.get_weights()))
+            print('R^2 of mu:', r2)
+            print('Loss:', np.linalg.norm(old_weight - mu_func.get_weights()))
+            # print('cov', np.corrcoef(state_variables.transpose()))
+
+            r_squares.append(r2)
+            losses.append(np.linalg.norm(old_weight - mu_func.get_weights()))
+            weights.append(mu_func.get_weights())
+
+        plt.plot(np.maximum(r_squares, 0))
+        plt.title('r^2')
+        plt.show()
+
+        plt.plot(np.log(losses))
+        plt.title('log of loss')
+        plt.show()
+
+        weights = np.array(weights)
+        for w in range(weights.shape[1]):
+            plt.plot(weights[:, w])
+            plt.title('Weight ' + str(w))
+            plt.show()
+
+        plt.figure(1)
+        plt.subplot(411)
+        plt.plot(c_series[1:-1] / self.c_ss, label='c')
+        plt.gca().set_title('Consumption')
+        plt.subplot(412)
+        plt.plot(i_series[1:-1] / self.i_ss, label='i')
+        plt.gca().set_title('Investment')
+        plt.subplot(413)
+        plt.plot(k_series[1:-1] / self.k_ss, label='k')
+        plt.gca().set_title('Capital')
+        plt.subplot(414)
+        plt.plot(np.exp(a_series[1:-1]), label='a')
+        plt.gca().set_title('TFP')
+        # plt.legend()
+        # plt.title('Iterations ' + str(iter))
+        plt.show()
+
+        plt.scatter(k_series[buried:simulation - 1], k_series[buried + 1:simulation])
+        k_s = np.linspace(np.min(k_series[buried:simulation - 1]), np.max(k_series[buried:simulation - 1]), 100)
+        plt.plot(k_s, k_s, label='45 degree line')
+        plt.plot(k_s, (1 - self.delta) * k_s, label='remaining capital')
+        plt.title('Decisions')
+        plt.legend()
+        plt.show()
+
+        return mu_func.get_weights()
 
     def utility(self, c, c_last):
         return (c - self.b * c_last) ** (1 - self.gamma) / (1 - self.gamma) if self.gamma != 1 else np.log(c - self.b * c_last)

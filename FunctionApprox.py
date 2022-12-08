@@ -151,7 +151,6 @@ class LinearApprox(FunctionApprox):
 
     def approx(self, x, y, lr=1, update=True):
         regressors = self.regressor_construction(x)
-        print(np.var(y))
         dependent = np.copy(y).reshape((-1, 1))
         new_weights = np.dot(inv(np.dot(regressors.transpose(), regressors)), np.dot(regressors.transpose(), dependent))
         new_weights = new_weights.ravel()
