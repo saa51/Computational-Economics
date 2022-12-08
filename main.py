@@ -68,34 +68,51 @@ def question_2():
 def question_3():
     growth = GrowthWithHabitIACEnv()
     growth.solve_steady_state()
-    #growth.pea(220, 280, 1e-5, buried=500, order=2)
+    weights = growth.pea(1e-4, buried=500, order=1, max_iter=2000)
+    # growth.pea(1e-4, buried=500, order=2, init_weight=weights)
+    # growth.pea(1e-4, order=2)
+    '''
     growth.value_func_approx(0.1*growth.k_ss, 0.4*growth.c_ss, 21, 21)
     growth.plot_policy()
     growth.plot_value()
-
+    '''
     growth = GrowthWithHabitIACEnv({'b':0.1})
     growth.solve_steady_state()
-    #growth.pea(220, 280, 1e-5, buried=500, order=2)
+    weights = growth.pea(1e-4, buried=500, order=1, max_iter=2000)
+    # growth.pea(1e-4, buried=500, order=2, init_weight=weights)
+    # growth.pea(1e-4, order=2)
+    '''
     growth.value_func_approx(0.1*growth.k_ss, 0.4*growth.c_ss, 21, 21)
     growth.plot_policy()
     growth.plot_value()
-
+    '''
     growth = GrowthWithHabitIACEnv({'phi':0.03})
     growth.solve_steady_state()
-    #growth.pea(220, 280, 1e-5, buried=500, order=2)
+    weights = growth.pea(1e-4, buried=500, order=1, max_iter=2000)
+    # growth.pea(1e-4, buried=500, order=2, init_weight=weights)
+    # growth.pea(1e-4, order=2)
+    '''
     growth.value_func_approx(0.1*growth.k_ss, 0.4*growth.c_ss, 21, 21)
     growth.plot_policy()
     growth.plot_value()
-
+    '''
     growth = GrowthWithHabitIACEnv({'phi':0.03, 'b':0.1})
     growth.solve_steady_state()
-    #growth.pea(220, 280, 1e-5, buried=500, order=2)
+    weights = growth.pea(1e-4, buried=500, order=1, max_iter=2000)
+    # growth.pea(1e-4, buried=500, order=2, init_weight=weights)
+    # growth.pea(1e-4, order=2)
+    '''
     growth.value_func_approx(0.1*growth.k_ss, 0.4*growth.c_ss, 21, 21)
     growth.plot_policy()
     growth.plot_value()
-
+    '''
+    growth = GrowthWithHabitIACEnv()
+    growth.solve_steady_state()
+    weights = growth.pea(1e-4, buried=500, order=1, max_iter=2000, iri=True)
+    # growth.pea(1e-4, buried=500, order=2, init_weight=weights)
+    # growth.pea(1e-4, order=2)
 
 if __name__ == '__main__':
     question_1()
     question_2()
-    #question_3()
+    question_3()

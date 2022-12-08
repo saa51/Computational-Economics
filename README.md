@@ -41,6 +41,7 @@ Following is the optimal consumption, capital accumulation, and value function:
 ![image](figures/problem_set_1/q12_v.png)
 ![image](figures/problem_set_1/q12_c.png)
 ![image](figures/problem_set_1/q12_k.png)
+
 The X-axis is for capital, and the lines with different colors represent different TFP levels.
 
 #### Solving a optimal growth model with Chebyshev approximation and euler equation
@@ -73,21 +74,22 @@ Following is the main results.
 
 | index | T(5) | T(10) | T(25) | TH(5) | TH(10) | TH(25) | R(5) | R(10) | R(25) | 
 | :----: | :----: | :----: | :----: | :----: | :----: | :----: | :----: | :----: | :----: | 
-| rho | 0.9489813005320843 | 0.9558585784302387 | 0.9772729323983873 | 0.9584457132537361 | 1.2023962764420566 | 1.3958806599246751 | 0.960249213874119 | 0.9942382865351974 | 1.0 |
-| sigma_epsilon | 0.7792337727919413 | 1.0862579845810687 | 1.010657101453192 | 0.0006353786225143621 | 1.8439167794230527 | 2.817079034961109 | 0.9595960213868383 | 0.9918961180434522 | 1.0 |
-| sigma_a | 1.0000473536049053 | 0.9999960470162034 | 0.9999945511175873 | 2.089779030048299 | 1.5486342715435837 | 1.3139241178069108 | 1.0000146110564414 | 0.9999951529493425 | 1.0 |
-| sigma_k | 0.8980602752028246 | 1.046804736558316 | 1.0094278111060933 | 0.640532387594404 | 0.5516469891459609 | 0.5551399026945608 | 1.0000194935978146 | 1.0000061654351353 | 1.0 | 
-| sigma_ak | 0.8979272520389272 | 1.0468215152083467 | 1.0094404187222084 | 0.6404409052628426 | 0.20032107276818503 | 0.4742085794630114 | 1.0000210551390718 | 1.000006632563311 | 1.0 | 
-| sigma_y | 0.9643723894330363 | 1.016457681510672 | 1.0033115758511089 | 0.8761224950010456 | 0.7601242660502582 | 0.8284682390792939 | 1.000007147128859 | 1.0000022552190273 | 1.0 | 
-| sigma_c | 0.9894466705978897 | 1.0056940913812102 | 1.0011155230106046 | 0.9696329346187078 | 1.0547732697227472 | 0.9972331678651093 | 1.0000025311878658 | 1.0000007945277887 | 1.0 | 
-| sigma_i | 0.8969417599998663 | 1.0465165503950191 | 1.0093518616179082 | 0.6390693726384001 | 0.8788448685123512 | 0.6964464758441952 | 1.0000218465266735 | 1.0000068212979027 | 1.0 | 
-| rho_y | 0.9999999955611639 | 1.000000001799816 | 1.0000000003912346 | 0.9999999713844252 | 0.9999997828497693 | 0.9999999143962336 | 1.0000000000004567 | 1.0000000000000082 | 1.0 | 
+| rho | 0.94898130053 | 0.95585857843 | 0.97727293239 | 0.95844571325 | 1.202396276442 | 1.39588065992 | 0.96024921387 | 0.9942382865 | 1.0 |
+| sigma_epsilon | 0.77923377279 | 1.08625798458 | 1.01065710145 | 0.00063537862 | 1.843916779423 | 2.81707903496 | 0.95959602138 | 0.9918961180 | 1.0 |
+| sigma_a | 1.00004735360 | 0.99999604701 | 0.99999455111 | 2.08977903004 | 1.548634271543 | 1.31392411780 | 1.00001461105 | 0.9999951529 | 1.0 |
+| sigma_k | 0.89806027520 | 1.04680473655 | 1.00942781110 | 0.64053238759 | 0.551646989145 | 0.55513990269 | 1.00001949359 | 1.0000061654 | 1.0 | 
+| sigma_ak | 0.89792725203 | 1.04682151520 | 1.00944041872 | 0.64044090526 | 0.200321072768 | 0.47420857946 | 1.00002105513 | 1.0000066325 | 1.0 | 
+| sigma_y | 0.96437238943 | 1.01645768151 | 1.00331157585 | 0.87612249500 | 0.760124266050 | 0.82846823907 | 1.0000071471 | 1.0000022552 | 1.0 | 
+| sigma_c | 0.98944667059 | 1.00569409138 | 1.00111552301 | 0.96963293461 | 1.054773269722 | 0.99723316786 | 1.00000253118 | 1.0000007945 | 1.0 | 
+| sigma_i | 0.89694175999 | 1.04651655039 | 1.00935186161 | 0.63906937263 | 0.878844868512 | 0.69644647584 | 1.00002184652 | 1.0000068212 | 1.0 | 
+| rho_y | 0.99999999556 | 1.00000000179 | 1.00000000039 | 0.99999997138 | 0.999999782849 | 0.99999991439 | 1.00000000000 | 1.0000000000 | 1.0 | 
 
 The results are similar to Kopecky and Suen's paper.
 In the case of moment approximation, Rowenhorst's performance is best and Tauchen Hussey is the worst.
 As the number of grids increases, Tauchen and Rowenhorst converges to the quasi-exact results.
 The Tauchen Hussay method doesn't converge as the original paper shows.
 The reason may be that Python suffers more from numerical errors than Matlab.
+
 ### Question 2
 
 The main code is in `FuncApproxEnv.py`.
@@ -96,6 +98,7 @@ The main code is in `FuncApproxEnv.py`.
 The approximated function is f(x) = alpha * beta * x ^ alpha, with alpha=0.3 and beta=0.98.
 
 The approximation result is following:
+
 ![image](figures/problem_set_1/q2_5.png)
 ![image](figures/problem_set_1/q2_10.png)
 
@@ -103,12 +106,62 @@ The computing time and maximum absolute error is in the following table:
 
 | Method | Spline(5) | Polynomial(5) | Chebyshev(5) | Spline(10) | Polynomial(10) | Chebyshev(10) |
 | :----: | :----: | :----: | :----: | :----: | :----: | :----: |
-| Computational Time | 0.0 | 0.0009911060333251953 | 0.0 | 0.0 | 0.0 | 0.0010030269622802734 |
-| Maximum Absolute Error | 0.16146569818991097 | 0.12879991407126204 | 0.1579644117293864 | 0.12678461317265927 | 0.09112689484861211 | 0.10377239873151732|
+| Computational Time | 0.0 | 0.0009911060333 | 0.0 | 0.0 | 0.0 | 0.0010030 |
+| Maximum Absolute Error | 0.161465698189 | 0.1287999140712 | 0.1579644117 | 0.12678461317 | 0.091126894848 | 0.10377239873|
 
 The computional time is neglectable since the number of basis function is small.
 
 Chebyshev and Polynomial approximation can capture the curvature of the function, so both of them perform better than Spline in term of errors.
 This function is kind of ill-behaved because that its all order of derivatives is infinite at 0, so the information at 0 is important.
 Because Chebyshev approximation doesn't take grids at the endpoints, so there is a large error at 0. 
+
 ### Question 3
+
+The simulation path and the decision rule given the original parameters is:
+
+![image](figures/problem_set_1/q3_1_p.png)
+![image](figures/problem_set_1/q3_1_d.png)
+
+The remaining capital line is y = (1 - delta) * k.
+All the variables are normalized by steady states.
+
+The simulation path and the decision rule given b=0.1 is:
+
+![image](figures/problem_set_1/q3_2_p.png)
+![image](figures/problem_set_1/q3_2_d.png)
+
+The simulation path and the decision rule given phi=0.03 is:
+
+![image](figures/problem_set_1/q3_3_p.png)
+![image](figures/problem_set_1/q3_3_d.png)
+
+The simulation path and the decision rule given b=0.01 and phi=0.03 is:
+
+![image](figures/problem_set_1/q3_4_p.png)
+![image](figures/problem_set_1/q3_4_d.png)
+
+It seems that the irreversibility constraint is never binding with the original parameters.
+So the solution to the OBC problem is similar to the problem with no constraint.
+
+![image](figures/problem_set_1/q3_5_p.png)
+![image](figures/problem_set_1/q3_5_d.png)
+
+Since the correlation between state variables c[t-1] and k[t] is high, only k[t] is used in PEA.
+
+Comparing the results in the first 2 problems, we can see that the dispersion of investment is larger if the habit coefficient is higher.
+This result shows that the habit utility can smooth the consumption path by increasing the volatility of investment.
+
+Comparing the results in the problem 1 and problem 3, we can see that the dispersion of capital is larger if the investment adjustment cost is smaller.
+This result shows that the investment adjustment cost smooth the capital path.
+
+The fourth results mix the 2 channels. 
+
+The above results are based on PEA with the first order, i.e. the expectation only dependent on log(k) and log(a).
+When the second order term log(k)log(a), log(k)^2, log(a)^2, are added to the regression, the regression became unstable.
+Below is the path of the coefficient of constant.
+
+![image](figures/problem_set_1/q3_ho.png)
+
+We can see the coefficient doesn't converge.
+The overall R^2 is high, so I think there is not much curvature to be captured by higher order terms.
+The graph of decision rule also shows that the decision rule is almost linear.
