@@ -40,14 +40,15 @@ class Rowenhorst(MarkovApprox):
 
 
 class Tauchen(MarkovApprox):
+    _omega_dict = {
+        5: 1.6425,
+        25: 2.5107,
+        10: 1.9847
+    }
     def approx(self, n, m=None):
-        __tauchen_omega_dict = {
-            5: 1.6425,
-            25: 2.5107,
-            10: 1.9847
-        }
+
         if m is None:
-            m = __tauchen_omega_dict.get(n, 3)
+            m = Tauchen._omega_dict.get(n, 3)
         grids = np.linspace(self.mean_z - m * self.sigma_z, self.mean_z + m * self.sigma_z, n, endpoint=True)
         w = 2 * m * self.sigma_z / (n - 1)
         trans_mat = np.zeros((n, n))

@@ -48,28 +48,31 @@ class ChebyshevApprox2D(FunctionApprox):
         return new_weights
 
 
-class PolinomialApprox(FunctionApprox):
+class PolynomialApprox(FunctionApprox):
     def __init__(self, deg):
         self.deg = deg
         self.weights = np.zeros(deg)
 
     def eval(self, x):
-        y = np.zeros(shape=x.shape)
-        for d in range(self.deg):
-            y = y * x + self.weights[d]
-        return y
+        z = np.array(x)
+        ans = np.dot(z.reshape((-1, 1)) ** np.arange(self.deg), self.weights.reshape(-1, 1))
+        if hasattr(x, 'shape'):
+            ans = ans.reshape(x.shape)
+        return ans
 
     def approx(self, grids, values, lr=1, update=True):
-        basis_values = [np.ones(shape=grids.shape)]
-        for d in range(self.deg - 1):
-            basis_values.append(basis_values[-1] * grids)
-        basis_values.reverse()
-        basis_values = np.stack(basis_values, axis=1)
-        new_weights = np.dot(inv(basis_values), values.reshape((-1, 1))).ravel()
+        basis_values = grids.reshape((-1, 1)) ** np.arange(self.deg)
+        new_weights = np.dot(inv(np.dot(basis_values.transpose(),basis_values)), np.dot(basis_values.transpose(), values.reshape((-1, 1)))).ravel()
         new_weights = lr * new_weights + (1 - lr) * self.weights
         if update:
             self.weights = new_weights
         return new_weights
+
+    def gradient(self, x):
+        ans = np.dot(x.reshape((-1, 1)) ** np.arange(self.deg), (np.arange(self.deg) * self.weights).reshape(-1, 1))
+        if hasattr(x, 'shape'):
+            ans = ans.reshape(x.shape)
+        return ans
 
 
 class SplineApprox(FunctionApprox):
@@ -84,39 +87,57 @@ class SplineApprox(FunctionApprox):
 
     def approx(self, grids, values, lr=1):
         idx = np.argsort(grids)
-        self.grids = grids[idx]
-        values = values[idx]
+        self.grids = np.array(grids)[idx]
+        values = np.array(values)[idx]
         if self.values is None:
             self.values = np.zeros(shape=values.shape)
         self.values = lr * values + (1 - lr) * self.values
 
 
 class ChebyshevApprox(FunctionApprox):
-    def __init__(self, mean, width, n):
+    def __init__(self, mean, width, n, grids=None):
         self.mean = mean
         self.width = width
         self.deg = n
         self.weights = np.zeros(n)
-        self.default_grids = np.cos(np.pi * np.arange(1, 2 * n, 2) / (2 * n)) * width + mean
+        if grids is None:
+            self.default_grids = np.cos(np.pi * np.arange(1, 2 * n, 2) / (2 * n)) * width + mean
+        else:
+            self.default_grids = grids
 
     def eval(self, x):
         x_g = (x - self.mean) / self.width
         basis_values = np.cos(np.kron(np.arange(0, self.deg).reshape((-1, 1)), np.arccos(x_g).reshape((1, -1))))
         y = np.dot(basis_values.transpose(), self.weights.reshape((-1, 1)))
-        return y.reshape(x.shape)
+        if hasattr(x, 'shape'):
+            y = y.reshape(x.shape)
+        return y
 
     def approx(self, values, grids=None, lr=1, update=True):
         if grids is None:
             grids = self.default_grids
         g_g = (grids - self.mean) / self.width
-        basis_values = np.cos(np.kron(np.arange(0, self.deg).reshape((-1, 1)), np.arccos(g_g).reshape((1, -1))))
-        values = np.reshape(values, (1, -1))
-        new_weights = np.dot(values, inv(basis_values))
+        basis_values = np.cos(np.kron(np.arccos(g_g).reshape((-1, 1)), np.arange(0, self.deg).reshape((1, -1))))
+        values = np.reshape(values, (-1, 1))
+        new_weights = np.dot(inv(np.dot(basis_values.transpose(), basis_values)), np.dot(basis_values.transpose(), values))
         new_weights = new_weights.ravel()
         new_weights = lr * new_weights + (1 - lr) * self.weights
         if update:
             self.weights = new_weights
         return new_weights
+
+    def gradient(self, x):
+        x_g = (x - self.mean) / self.width
+        def gradient_n(x):
+            if not hasattr(gradient_n, 'n'):
+                gradient_n.n = 0
+            return gradient_n.n * np.sin(gradient_n.n * np.arccos(x)) / np.sin(np.arccos(x))
+
+        gradients = []
+        for n in range(self.deg):
+            gradient_n.n = n
+            gradients.append(np.piecewise(x_g, [x_g <= -1, np.logical_and(x_g > -1, x_g < 1), x_g >= 1], [-(-1) ** n * n * n, gradient_n, n * n]))
+        return np.dot(self.weights.reshape(1, -1), np.array(gradients)).squeeze() / self.width
 
 
 class LinearApprox(FunctionApprox):
@@ -182,6 +203,8 @@ class ExpLogLinearApprox(FunctionApprox):
 
 
 if __name__ == '__main__':
+    # test 1
+    '''
     x = np.random.normal(0, 1, 1000)
     e = np.random.normal(0, 1, 1000)
     beta_0 = 1
@@ -190,3 +213,19 @@ if __name__ == '__main__':
     y=e+beta_0
     approx = ExpLogLinearApprox(1,constant=False)
     print(approx.approx(np.exp(x).reshape((-1, 1)), np.exp(y)))
+    '''
+
+    x = np.linspace(0, 1, 1000)
+    e = np.random.normal(0, 1, 1000)
+    y = np.sqrt(x + 1)
+    approx = ChebyshevApprox(0.5, 0.5, 5)
+    print(approx.approx(y, x))
+    y_hat = approx.eval(x)
+    import matplotlib.pyplot as plt
+    #plt.plot(x, y, label='real')
+    #plt.plot(x, y_hat, label='approx')
+    plt.plot(x, approx.gradient(x), label='computed_g')
+    plt.plot(x[:-1]+0.0005, (y_hat[1:] - y_hat[:-1]) * 1000, label='cut')
+    plt.plot(x, 0.5 / y, label='real_g')
+    plt.legend()
+    plt.show()

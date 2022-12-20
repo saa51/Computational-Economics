@@ -1,6 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
-from FunctionApprox import SplineApprox, PolinomialApprox, ChebyshevApprox
+from FunctionApprox import SplineApprox, PolynomialApprox, ChebyshevApprox
 import time
 
 default_params = {
@@ -40,7 +40,7 @@ class FuncApproxEnv:
         print('Maximum Absolute Error:', np.max(np.abs(lin_value - real_value)))
 
         start_time = time.time()
-        poly = PolinomialApprox(n)
+        poly = PolynomialApprox(n)
         poly.approx(even_grids, even_value)
         poly_value = poly.eval(test_grids)
         end_time = time.time()

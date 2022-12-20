@@ -2,7 +2,11 @@
 
 ## Code List
 
-`main.py`: where the code should be run.
+`main.py`: where the problem set 1 should be run.
+
+`problem_set_2.py`: where the problem set 2 should be run.
+
+`SOGEnv.py`: Provide a stochastic optimal growth model environment related to problem set 2.
 
 `OptimalGrowth.py`: Provide a optimal growth model environment and solutions, corresponding to Question 1 in Problem set 1.
 
@@ -165,3 +169,38 @@ Below is the path of the coefficient of constant.
 We can see the coefficient doesn't converge.
 The overall R^2 is high, so I think there is not much curvature to be captured by higher order terms.
 The graph of decision rule also shows that the decision rule is almost linear.
+
+## Problem Set 2
+
+| a | mean | min | max |
+| :----: | :----: | :----: | :----: |
+| -0.07 | -3.011 | -5.237 | -1.807 |
+| -0.03 | -3.164 | -6.12 | -1.831 |
+| 0.0 | -3.224 | -6.261 | -1.856 |
+| 0.03 | -3.194 | -6.14 | -1.875 |
+| 0.07 | -3.068 | -5.468 | -1.903 |
+
+| a | mean | min | max |
+| :----: | :----: | :----: | :----: |
+| -0.07 | -6.895 | -10.193 | -5.863 |
+| -0.03 | -6.913 | -9.012 | -5.869 |
+| 0.0 | -6.982 | -9.371 | -5.845 |
+| 0.03 | -6.932 | -9.817 | -5.93 |
+| 0.07 | -6.885 | -9.32 | -5.87 |
+
+| index | VFI | Chebyshev Approximation | modified PEA | EGM | Real |
+| :----: | :----: | :----: | :----: | :----: | :----: |
+| sigma y | 0.2048 | 0.1483 | 0.12 | 0.1574 | 1.8 |
+| sigma c | 0.1376 | 0.0955 | 0.0764 | 0.1052 | 1.3 |
+| sigma i | 0.0708 | 0.0553 | 0.0455 | 0.0538 | 5.1 |
+| corr(y, c) | 0.9914 | 0.9907 | 0.9907 | 0.9949 | 0.739 |
+| corr(y, i) | 0.9671 | 0.9719 | 0.9735 | 0.9802 | 0.714 |
+| corr(c, i) | 0.9254 | 0.9307 | 0.9333 | 0.955 | -100.0 |
+| mean(k) | 39.8387 | 38.097 | 38.5668 | 36.0167 | -100.0 |
+| mean(c) | 2.8463 | 2.7563 | 2.7826 | 2.6438 | -100.0 |
+| mean(y) | 3.8389 | 3.706 | 3.7454 | 3.5434 | -100.0 |
+| mean(i) | 0.9927 | 0.9497 | 0.9627 | 0.8996 | -100.0 |
+| autocorr(y) | 0.997 | 0.991 | 0.9914 | 0.9964 | -100.0 |
+| autocorr(c) | 0.9978 | 0.9952 | 0.9953 | 0.9982 | -100.0 |
+| autocorr(i) | 0.9903 | 0.9816 | 0.9831 | 0.9914 | -100.0 |
+| autocorr(a) | 0.992 | 0.9803 | 0.9817 | 0.9906 | -100.0 |
