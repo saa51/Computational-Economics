@@ -175,9 +175,7 @@ class LinearApprox(FunctionApprox):
         dependent = np.copy(y).reshape((-1, 1))
         new_weights = np.dot(inv(np.dot(regressors.transpose(), regressors)), np.dot(regressors.transpose(), dependent))
         new_weights = new_weights.ravel()
-        new_weights = lr * new_weights + (1 - lr) * self.weights
-        if update:
-            self.weights = new_weights
+
         prediction = np.dot(regressors, new_weights.reshape((-1, 1))).ravel()
         #r_square = r2_score(dependent.ravel(), prediction)
         z = dependent.ravel() - prediction
@@ -185,6 +183,11 @@ class LinearApprox(FunctionApprox):
         #print(self.weights[0], np.mean(z))
         #print(np.linalg.norm(inv(np.dot(regressors.transpose(), regressors))))
         r_square = 1 - u / np.var(dependent)
+
+        new_weights = lr * new_weights + (1 - lr) * self.weights
+        if update:
+            self.weights = new_weights
+
         return new_weights, r_square
 
 

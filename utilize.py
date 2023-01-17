@@ -1,3 +1,6 @@
+import numpy as np
+
+
 def write_markdown_table(content, title=None, index=None, align='l'):
     output = ''
     row_num = len(content)
@@ -66,3 +69,20 @@ def write_latex_table(content, title=None, index=None, align='c', hline=False, v
         output += '\\hline\n'
     output += '\\end{tabular}\n'
     return output
+
+
+def gen_time_series_moments(data):
+    ar_coef = []
+    for v in data:
+        ar_coef.append(np.corrcoef(v[1:], v[:-1])[0][1])
+    return np.mean(data, axis=1), np.cov(data), np.corrcoef(data), np.array(ar_coef)
+
+
+def compute_gini(data):
+    data = np.sort(data)
+    cumsum = np.cumsum(data)
+    lorenz_curve = cumsum / cumsum[-1]
+    lorenz_curve = np.append([0], lorenz_curve)
+    b = np.sum((lorenz_curve[1:] + lorenz_curve[:-1]) / len(data) / 2)
+    gini = 1 - b * 2
+    return gini, lorenz_curve

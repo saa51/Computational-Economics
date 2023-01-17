@@ -1,0 +1,256 @@
+2023-01-14 13:43:27,561 - FinalProject.KrusellSmithEnv - INFO - Calculating transition matrix.
+2023-01-14 13:43:27,562 - FinalProject.KrusellSmithEnv - DEBUG - Transition Matrix:
+[[0.85069444 0.11588542 0.02430556 0.00911458]
+ [0.12291667 0.83611111 0.00208333 0.03888889]
+ [0.58333333 0.03125    0.29166667 0.09375   ]
+ [0.09375    0.35       0.03125    0.525     ]]
+2023-01-14 13:43:27,562 - FinalProject.KrusellSmithEnv - DEBUG - Z Transition Matrix:
+[[0.875 0.125]
+ [0.125 0.875]]
+2023-01-14 13:43:27,563 - FinalProject.KrusellSmithEnv - DEBUG - e Transition Matrix
+Good to Good:
+[[0.97222222 0.02777778]
+ [0.66666667 0.33333333]]
+Good to Bad:
+[[0.92708333 0.07291667]
+ [0.25       0.75      ]]
+Bad to Good:
+[[0.98333333 0.01666667]
+ [0.75       0.25      ]]
+Bad to Bad:
+[[0.95555556 0.04444444]
+ [0.4        0.6       ]]
+2023-01-14 13:43:27,565 - FinalProject.KrusellSmithEnv - INFO - Calculating the stationary equilibrium without aggregate uncertainty when state is good.
+2023-01-14 13:43:32,997 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 1: r demand 0.0312, r supply 0.03140439340918089, k demand 14.56498454043132, k supply 14.417138372836234, labor 0.314016, wage 2.572706940121704.
+2023-01-14 13:43:38,015 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 2: r demand 0.031302196704590446, r supply 0.03059388511999854, k demand 14.490752231164887, k supply 15.018358577500695, labor 0.314016, wage 2.5679788530940026.
+2023-01-14 13:43:43,016 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 3: r demand 0.031251098352295226, r supply 0.03085807145308014, k demand 14.527790629017602, k supply 14.817941021949055, labor 0.314016, wage 2.5703398767450314.
+2023-01-14 13:43:48,608 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 4: r demand 0.031225549176147612, r supply 0.031128139519155735, k demand 14.546368088859774, k supply 14.61755585045645, labor 0.314016, wage 2.5715226518848873.
+2023-01-14 13:43:54,463 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 5: r demand 0.031212774588073804, r supply 0.03112813951915787, k demand 14.555671433572533, k supply 14.617555850454885, labor 0.314016, wage 2.5721146066678244.
+2023-01-14 13:43:59,977 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 6: r demand 0.0312063872940369, r supply 0.031128149959000952, k demand 14.560326765843866, k supply 14.617548190337798, labor 0.314016, wage 2.572410726036071.
+2023-01-14 13:44:05,348 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 7: r demand 0.03120319364701845, r supply 0.03140439340918089, k demand 14.56265534773676, k supply 14.417138372836234, labor 0.314016, wage 2.572558821236109.
+2023-01-14 13:44:05,348 - FinalProject.KrusellSmithEnv - INFO - Solution: interest rate 0.03120319364701845, capital 14.56265534773676, labor 0.314016, wage 2.572558821236109.
+2023-01-14 13:44:05,348 - FinalProject.KrusellSmithEnv - INFO - Calculating the stationary equilibrium without aggregate uncertainty when state is bad.
+2023-01-14 13:44:12,026 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 1: r demand 0.0322, r supply 0.0326545664665852, k demand 12.59797966639678, k supply 12.325039618913216, labor 0.29439, wage 2.4496903669461982.
+2023-01-14 13:44:18,553 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 2: r demand 0.032427283233292595, r supply 0.03106127425918863, k demand 12.460284111329253, k supply 13.327021424492225, labor 0.29439, wage 2.440017434441051.
+2023-01-14 13:44:24,958 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 3: r demand 0.032313641616646294, r supply 0.031674256398000436, k demand 12.528821665568177, k supply 12.9262308849871, labor 0.29439, wage 2.444840612370098.
+2023-01-14 13:44:31,267 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 4: r demand 0.03225682080832315, r supply 0.03231923814839091, k demand 12.563322623345702, k supply 12.525431921119896, labor 0.29439, wage 2.44726215258468.
+2023-01-14 13:44:37,403 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 5: r demand 0.03228523121248472, r supply 0.03199258278100815, k demand 12.546052694954788, k supply 12.725831473430995, labor 0.29439, wage 2.4460505500904386.
+2023-01-14 13:44:43,422 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 6: r demand 0.032271026010403936, r supply 0.03199258374351705, k demand 12.554682789149266, k supply 12.725830875210033, labor 0.29439, wage 2.4466561430061056.
+2023-01-14 13:44:49,519 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 7: r demand 0.03226392340936354, r supply 0.03231923812025564, k demand 12.559001487792385, k supply 12.525431938157269, labor 0.29439, wage 2.4469590956831495.
+2023-01-14 13:44:55,740 - FinalProject.KrusellSmithEnv - DEBUG - Iteration 8: r demand 0.03226747470988374, r supply 0.03199258374351705, k demand 12.556841833976483, k supply 12.725830875210033, labor 0.29439, wage 2.446807606320241.
+2023-01-14 13:44:55,740 - FinalProject.KrusellSmithEnv - INFO - Solution: interest rate 0.03226747470988374, capital 12.556841833976483, labor 0.29439, wage 2.446807606320241.
+2023-01-14 13:44:55,741 - FinalProject.KrusellSmithEnv - INFO - Solving K-S approximated equilibrium.
+2023-01-14 13:44:55,741 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 13:44:58,164 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 4.646960369894713.
+2023-01-14 13:45:24,035 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 3.332655492442548.
+2023-01-14 13:45:47,936 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 1.731766306155727.
+2023-01-14 13:46:12,263 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 1.005058133496577.
+2023-01-14 13:46:38,538 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 40: loss 0.8064979805175998.
+2023-01-14 13:47:03,078 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 50: loss 0.6456303898019087.
+2023-01-14 13:47:26,383 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 60: loss 0.4765438037811762.
+2023-01-14 13:47:49,236 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 70: loss 0.3062513054990603.
+2023-01-14 13:48:12,355 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 80: loss 0.2488077847318806.
+2023-01-14 13:48:35,105 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 90: loss 0.22538925537239507.
+2023-01-14 13:48:57,778 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 100: loss 0.20504548783623733.
+2023-01-14 13:49:21,138 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 110: loss 0.17522488327931995.
+2023-01-14 13:49:44,587 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 120: loss 0.13984248997419968.
+2023-01-14 13:50:08,723 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 130: loss 0.11844798142383439.
+2023-01-14 13:50:33,945 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 140: loss 0.09122367581938562.
+2023-01-14 13:51:00,605 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 150: loss 0.06872338844123504.
+2023-01-14 13:51:23,721 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 160: loss 0.05354222614597859.
+2023-01-14 13:51:47,359 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 170: loss 0.04354218273577004.
+2023-01-14 13:52:12,760 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 180: loss 0.03661563291797165.
+2023-01-14 13:52:38,696 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 190: loss 0.031082391068053994.
+2023-01-14 13:53:02,725 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 200: loss 0.027446073079900657.
+2023-01-14 13:53:26,589 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 210: loss 0.024719616485242568.
+2023-01-14 13:53:51,212 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 220: loss 0.022110505678050174.
+2023-01-14 13:54:16,968 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 230: loss 0.01984021089273824.
+2023-01-14 13:54:43,656 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 240: loss 0.017509480707651903.
+2023-01-14 13:55:13,336 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 250: loss 0.01604090309174211.
+2023-01-14 13:55:39,872 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 260: loss 0.014431688895193417.
+2023-01-14 13:56:06,168 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 270: loss 0.013051117915399146.
+2023-01-14 13:56:32,353 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 280: loss 0.011746255030868014.
+2023-01-14 13:56:58,182 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 290: loss 0.010419403347203371.
+2023-01-14 13:57:21,303 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 13:57:21,305 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 13:57:29,256 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.119 + 0.951 * log(K), r2 = 0.9996804990504676.
+2023-01-14 13:57:29,280 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.117 + 0.952 * log(K), r2 = 0.9999363902398274.
+2023-01-14 13:57:29,683 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 1: loss 0.004697366585117754.
+2023-01-14 13:57:29,684 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 13:57:32,210 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.05554212536092251.
+2023-01-14 13:57:59,294 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.06531856445074169.
+2023-01-14 13:58:29,074 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.027718409164300795.
+2023-01-14 13:58:53,869 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.018461106765904844.
+2023-01-14 13:59:18,517 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 40: loss 0.012956434495819735.
+2023-01-14 13:59:43,821 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 50: loss 0.009557647834576244.
+2023-01-14 14:00:06,109 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:00:06,111 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:00:14,144 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.119 + 0.952 * log(K), r2 = 0.9996085210602228.
+2023-01-14 14:00:14,164 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.113 + 0.953 * log(K), r2 = 0.9999160944958289.
+2023-01-14 14:00:14,485 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 2: loss 0.003956874820721226.
+2023-01-14 14:00:14,485 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:00:18,280 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.04720257391619498.
+2023-01-14 14:00:44,022 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.04711805040780348.
+2023-01-14 14:01:10,221 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.01998081855366962.
+2023-01-14 14:01:35,647 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.012008485701727523.
+2023-01-14 14:02:00,597 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 40: loss 0.008504072561322573.
+2023-01-14 14:02:25,042 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 50: loss 0.0063851491895761114.
+2023-01-14 14:02:45,934 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:02:45,935 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:02:53,312 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.119 + 0.952 * log(K), r2 = 0.9996029025192686.
+2023-01-14 14:02:53,329 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.11 + 0.954 * log(K), r2 = 0.9999316478044814.
+2023-01-14 14:02:53,584 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 3: loss 0.003353900280975139.
+2023-01-14 14:02:53,584 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:02:56,029 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.04041200728649841.
+2023-01-14 14:03:19,679 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.03947208047152628.
+2023-01-14 14:03:43,086 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.016951684861531646.
+2023-01-14 14:04:06,623 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.009637715331834329.
+2023-01-14 14:04:25,433 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:04:25,434 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:04:32,886 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.952 * log(K), r2 = 0.9994609150777656.
+2023-01-14 14:04:32,904 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.107 + 0.955 * log(K), r2 = 0.9999272851411419.
+2023-01-14 14:04:33,138 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 4: loss 0.0028577005925399385.
+2023-01-14 14:04:33,139 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:04:35,509 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.036029730489453016.
+2023-01-14 14:05:00,478 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.041459664012130304.
+2023-01-14 14:05:25,591 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.019284671872227932.
+2023-01-14 14:05:50,152 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.011148578292107914.
+2023-01-14 14:06:14,562 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 40: loss 0.0072795581584514935.
+2023-01-14 14:06:40,126 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 50: loss 0.005162244452918685.
+2023-01-14 14:07:03,226 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:07:03,227 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:07:11,100 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.118 + 0.952 * log(K), r2 = 0.9993436774238121.
+2023-01-14 14:07:11,117 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.105 + 0.956 * log(K), r2 = 0.9999159824308417.
+2023-01-14 14:07:11,389 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 5: loss 0.0025841328604474523.
+2023-01-14 14:07:11,390 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:07:13,899 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.03189493472776661.
+2023-01-14 14:07:38,775 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.02491047078878239.
+2023-01-14 14:08:03,910 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.008258528306825497.
+2023-01-14 14:08:28,171 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:08:28,172 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:08:36,219 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.118 + 0.952 * log(K), r2 = 0.9996163655326583.
+2023-01-14 14:08:36,238 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.101 + 0.958 * log(K), r2 = 0.9998826680190945.
+2023-01-14 14:08:36,492 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 6: loss 0.0035682569621731247.
+2023-01-14 14:08:36,492 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:08:39,341 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.03984675802789184.
+2023-01-14 14:09:06,643 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.041664031212704344.
+2023-01-14 14:09:32,870 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.017343263836473.
+2023-01-14 14:09:57,526 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.009172034907471982.
+2023-01-14 14:10:22,248 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 40: loss 0.005908357792108632.
+2023-01-14 14:10:47,288 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 50: loss 0.003823807995317452.
+2023-01-14 14:11:10,646 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:11:10,647 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:11:18,519 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.953 * log(K), r2 = 0.9996483150367753.
+2023-01-14 14:11:18,537 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.098 + 0.959 * log(K), r2 = 0.9998825992390354.
+2023-01-14 14:11:18,781 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 7: loss 0.0033154776089048127.
+2023-01-14 14:11:18,781 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:11:21,211 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.0362653715718011.
+2023-01-14 14:11:46,262 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.03773693698190783.
+2023-01-14 14:12:12,064 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.015747917752385376.
+2023-01-14 14:12:35,325 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.007871685747112167.
+2023-01-14 14:12:58,626 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 40: loss 0.005024477027269825.
+2023-01-14 14:13:21,993 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 50: loss 0.003063567339012252.
+2023-01-14 14:13:42,921 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:13:42,923 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:13:50,699 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.953 * log(K), r2 = 0.9996848684050964.
+2023-01-14 14:13:50,724 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.095 + 0.96 * log(K), r2 = 0.9998846448670065.
+2023-01-14 14:13:51,021 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 8: loss 0.0026680837921591177.
+2023-01-14 14:13:51,021 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:13:54,444 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.02977905573769135.
+2023-01-14 14:14:18,317 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.03181244690806295.
+2023-01-14 14:14:41,582 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.013586566633428276.
+2023-01-14 14:15:04,754 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.007135057005349665.
+2023-01-14 14:15:27,777 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 40: loss 0.004166492777471831.
+2023-01-14 14:15:50,859 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 50: loss 0.0025832489971904238.
+2023-01-14 14:16:12,068 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:16:12,070 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:16:19,371 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.953 * log(K), r2 = 0.9996145702657161.
+2023-01-14 14:16:19,388 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.092 + 0.961 * log(K), r2 = 0.9998812644054594.
+2023-01-14 14:16:19,625 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 9: loss 0.00275183846635961.
+2023-01-14 14:16:19,626 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:16:21,953 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.030120724744996608.
+2023-01-14 14:16:45,176 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.03015093289480575.
+2023-01-14 14:17:08,341 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.011694492607745133.
+2023-01-14 14:17:31,351 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.005801103745596947.
+2023-01-14 14:17:54,531 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 40: loss 0.0036850899100073775.
+2023-01-14 14:18:17,765 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 50: loss 0.002212465759328097.
+2023-01-14 14:18:38,351 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:18:38,352 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:18:45,706 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.953 * log(K), r2 = 0.9996658400009243.
+2023-01-14 14:18:45,723 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.09 + 0.962 * log(K), r2 = 0.9998946917655166.
+2023-01-14 14:18:45,955 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 10: loss 0.002084658410395887.
+2023-01-14 14:18:45,955 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:18:48,257 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.023735912433245687.
+2023-01-14 14:19:11,640 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.0222277144016374.
+2023-01-14 14:19:34,661 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.008688506320332579.
+2023-01-14 14:19:57,677 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.004605805484686698.
+2023-01-14 14:20:09,361 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:20:09,362 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:20:16,766 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.953 * log(K), r2 = 0.9996217704317829.
+2023-01-14 14:20:16,782 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.088 + 0.962 * log(K), r2 = 0.9998982233036462.
+2023-01-14 14:20:17,020 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 11: loss 0.001829535506980548.
+2023-01-14 14:20:17,021 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:20:19,323 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.021576946379191497.
+2023-01-14 14:20:43,375 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.020644349646119053.
+2023-01-14 14:21:07,662 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.008531465600071897.
+2023-01-14 14:21:32,024 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.004579494631826719.
+2023-01-14 14:21:49,282 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:21:49,283 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:21:57,094 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.953 * log(K), r2 = 0.9996762375393706.
+2023-01-14 14:21:57,112 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.087 + 0.963 * log(K), r2 = 0.999892716213533.
+2023-01-14 14:21:57,345 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 12: loss 0.001735238573218112.
+2023-01-14 14:21:57,345 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:21:59,662 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.020416746010411657.
+2023-01-14 14:22:23,713 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.018540239860307395.
+2023-01-14 14:22:47,026 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.006775918036304063.
+2023-01-14 14:23:10,271 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.00364732679506119.
+2023-01-14 14:23:21,905 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:23:21,906 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:23:29,771 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.953 * log(K), r2 = 0.9996724692497391.
+2023-01-14 14:23:29,787 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.085 + 0.964 * log(K), r2 = 0.9998920032161714.
+2023-01-14 14:23:30,009 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 13: loss 0.001535632917236296.
+2023-01-14 14:23:30,010 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:23:32,367 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.018219745983422797.
+2023-01-14 14:23:55,787 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.017871236448733896.
+2023-01-14 14:24:19,552 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.007256530066172218.
+2023-01-14 14:24:43,266 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.003945025465775132.
+2023-01-14 14:25:02,053 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:25:02,056 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:25:09,664 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.117 + 0.953 * log(K), r2 = 0.9996885809075271.
+2023-01-14 14:25:09,682 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.084 + 0.964 * log(K), r2 = 0.999902394885005.
+2023-01-14 14:25:09,906 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 14: loss 0.0010717193749289339.
+2023-01-14 14:25:09,907 - FinalProject.KrusellSmithEnv - INFO - Solving Krusell-Smith agent problem.
+2023-01-14 14:25:12,238 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 0: loss 0.01358379437623114.
+2023-01-14 14:25:35,524 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 10: loss 0.013382177430649733.
+2023-01-14 14:25:59,069 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 20: loss 0.005426084922113716.
+2023-01-14 14:26:22,552 - FinalProject.KrusellSmithEnv - DEBUG - VFI Iteration 30: loss 0.0030155306780770275.
+2023-01-14 14:26:36,889 - FinalProject.KrusellSmithEnv - INFO - Finish VFI.
+2023-01-14 14:26:36,890 - FinalProject.KrusellSmithEnv - INFO - Simulating aggregate capital path.
+2023-01-14 14:26:44,317 - FinalProject.KrusellSmithEnv - INFO - Regression for good state: log(K') = 0.118 + 0.953 * log(K), r2 = 0.9996617246205223.
+2023-01-14 14:26:44,335 - FinalProject.KrusellSmithEnv - INFO - Regression for bad state: log(K') = 0.083 + 0.964 * log(K), r2 = 0.999885518102791.
+2023-01-14 14:26:44,559 - FinalProject.KrusellSmithEnv - INFO - K-S Iteration 15: loss 0.0009882246046822446.
+2023-01-14 14:26:44,559 - FinalProject.KrusellSmithEnv - INFO - Model solved after 15 iterations.
+2023-01-14 14:26:57,083 - FinalProject - INFO - Business cycle data mean: consumption 0.8368305633447347, investment 0.28504497201782414, capital stock 11.397738508495095, output 1.121875535362559.
+2023-01-14 14:26:57,084 - FinalProject - INFO - Business cycle data covariance matrix (c, i, k, y):
+ [[ 7.86641290e-04 -9.32136858e-04  8.92205948e-03 -1.45495568e-04]
+ [-9.32136858e-04  2.91250094e-03  4.51312190e-03  1.98036409e-03]
+ [ 8.92205948e-03  4.51312190e-03  2.37017118e-01  1.34351814e-02]
+ [-1.45495568e-04  1.98036409e-03  1.34351814e-02  1.83486852e-03]].
+2023-01-14 14:26:57,085 - FinalProject - INFO - Business cycle data correlation matrix (c, i, k, y):
+ [[ 1.         -0.61582636  0.65341167 -0.12110412]
+ [-0.61582636  1.          0.17177271  0.85666205]
+ [ 0.65341167  0.17177271  1.          0.64424522]
+ [-0.12110412  0.85666205  0.64424522  1.        ]].
+2023-01-14 14:26:57,085 - FinalProject - INFO - Business cycle data auto-correlation: consumption 0.8089088900038053, investment 0.71844206250455, capital stock 0.994019796880256, output 0.8418771382491602.
+2023-01-14 14:26:57,085 - FinalProject - INFO - Normalized business cycle data mean (Ey = 1): consumption 0.7459210375545754, investment 0.25407896244542455, capital stock 10.159539226257985, output 1.
+2023-01-14 14:26:57,085 - FinalProject - INFO - Normalized business cycle data covariance matrix (c, i, k, y):
+ [[ 6.25010601e-04 -7.40611286e-04  7.08884955e-03 -1.15600685e-04]
+ [-7.40611286e-04  2.31407121e-03  3.58581359e-03  1.57345993e-03]
+ [ 7.08884955e-03  3.58581359e-03  1.88317360e-01  1.06746631e-02]
+ [-1.15600685e-04  1.57345993e-03  1.06746631e-02  1.45785924e-03]].
+2023-01-14 14:26:57,104 - FinalProject - INFO - Forecasting: real series mean 11.396740374981137, real series median 11.412900245296411.
+2023-01-14 14:26:57,106 - FinalProject - INFO - Forecast over 1 period(s): average forecast error 0.012922557527879327, forecast mean 11.395934147616376, forecast median 11.410817344525839.
+2023-01-14 14:26:57,468 - FinalProject - INFO - Forecast over 10 period(s): average forecast error 0.06575707812993507, forecast mean 11.390872901986356, forecast median 11.398720182053435.
+2023-01-14 14:26:57,839 - FinalProject - INFO - Forecast over 50 period(s): average forecast error 0.10371046692611484, forecast mean 11.384700326466016, forecast median 11.386681400776894.
+2023-01-14 14:26:59,138 - FinalProject - INFO - wealth gini index for the last ten periods: pooled gini 0.03818987082403358, averaged gini 0.03726362198417443, average of period gini 0.0406451697109179
+2023-01-14 14:27:04,580 - FinalProject - INFO - income gini index for the last ten periods: pooled gini 0.059839275366351474, averaged gini 0.0437792741960884, average of period gini 0.05125269165920249
