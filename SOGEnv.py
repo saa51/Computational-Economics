@@ -87,22 +87,26 @@ class SOGENV:
         while not np.allclose(old_value_mat, value_mat, atol=self.tol, rtol=0):
             iter += 1
             old_value_mat = np.copy(value_mat)
-
-            if hpi and (iter % (hpi_value_iter + hpi_policy_iter)) >= hpi_value_iter:
-                for idxk, k in enumerate(k_grids):
-                    for idxa, a in enumerate(a_grids):
-                        value_mat[idxk][idxa] = u_mat[idxk][idxa][policy_mat[idxk][idxa]] + self.beta * np.dot(
-                            trans_mat[idxa], old_value_mat.transpose()[:, policy_mat[idxk][idxa]])
+            if hpi and iter % hpi_policy_iter == 0:
+                local_u = np.take_along_axis(u_mat, np.expand_dims(policy_mat, axis=-1), axis=-1).squeeze(axis=-1)
+                local_vmat = np.copy(value_mat)
+                for _ in range(hpi_value_iter):
+                    value_mat = np.broadcast_to(trans_mat @ local_vmat.T, (nk, na, nk))
+                    value_mat = local_u + self.beta * np.take_along_axis(value_mat, np.expand_dims(policy_mat, axis=-1), axis=-1).squeeze(axis=-1)
+                    if mqp:
+                        b_up = self.beta / (1 - self.beta) * np.max(value_mat - local_vmat)
+                        b_low = self.beta / (1 - self.beta) * np.min(value_mat - local_vmat)
+                        value_mat = value_mat + (b_up + b_low) / 2
             else:
-                for idxk, k in enumerate(k_grids):
-                    for idxa, a in enumerate(a_grids):
-                        value_mat[idxk][idxa] = np.max(u_mat[idxk][idxa] + self.beta * np.dot(trans_mat[idxa], old_value_mat.transpose()))
-                        policy_mat[idxk][idxa] = np.argmax(u_mat[idxk][idxa] + self.beta * np.dot(trans_mat[idxa], old_value_mat.transpose()))
+                value_mat = np.max(u_mat + self.beta * np.dot(trans_mat, old_value_mat.transpose()), axis=-1)
+                policy_mat = np.argmax(u_mat + self.beta * np.dot(trans_mat, old_value_mat.transpose()), axis=-1)
 
-            if mqp:
-                b_up = self.beta / (1 - self.beta) * np.max(value_mat - old_value_mat)
-                b_low = self.beta / (1 - self.beta) * np.min(value_mat - old_value_mat)
-                value_mat = value_mat + (b_up + b_low) / 2
+                if mqp:
+                    b_up = self.beta / (1 - self.beta) * np.max(value_mat - old_value_mat)
+                    b_low = self.beta / (1 - self.beta) * np.min(value_mat - old_value_mat)
+                    value_mat = value_mat + (b_up + b_low) / 2
+            
+        policy_mat = np.argmax(u_mat + self.beta * np.dot(trans_mat, old_value_mat.transpose()), axis=-1)
         self.value_mat, self.policy_mat = value_mat, k_grids[policy_mat]
         return value_mat, k_grids[policy_mat]
 
