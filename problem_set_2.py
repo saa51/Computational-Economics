@@ -6,6 +6,7 @@ import os
 import matplotlib.pyplot as plt
 
 figure_path = './figures/problem_set_2'
+tex_path ='./reports/'
 width = 0.2
 
 
@@ -77,7 +78,8 @@ if __name__ == '__main__':
     titles = ['mean', 'min', 'max']
     index = [str(round(a, 2)) for a in sog.a_grids]
     content = [[round(float(np.mean(err)), 3), round(np.min(err), 3), round(np.max(err), 3)] for err in errs]
-    print(write_latex_table(content, title=titles, index=index, align='c'))
+    with open(os.path.join(tex_path, 'ps2_f.tex'), 'w+') as f:
+        print(write_latex_table(content, title=titles, index=index, align='c'), file=f)
     print(write_markdown_table(content, title=titles, index=index, align='c'))
 
     # Problem g:
@@ -140,7 +142,8 @@ if __name__ == '__main__':
     titles = ['mean', 'min', 'max']
     index = [str(round(a, 2)) for a in sog.a_grids]
     content = [[round(float(np.mean(err)), 3), round(np.min(err), 3), round(np.max(err), 3)] for err in errs]
-    print(write_latex_table(content, title=titles, index=index, align='c'))
+    with open(os.path.join(tex_path, 'ps2_k.tex'), 'w+') as f:
+        print(write_latex_table(content, title=titles, index=index, align='c'), file=f)
     print(write_markdown_table(content, title=titles, index=index, align='c'))
 
     # Problem l
@@ -167,5 +170,6 @@ if __name__ == '__main__':
     moments.append([1.8, 1.3, 5.1, 0.739, 0.714, -100, -100, -100, -100, -100, -100, -100, -100, -100])
     moments = np.array(moments).transpose()
     moments = np.around(moments, 4).tolist()
-    print(write_latex_table(moments, title=titles, index=index, align='c'))
+    with open(os.path.join(tex_path, 'ps2_n.tex'), 'w+') as f:
+        print(write_latex_table(moments, title=titles, index=index, align='c'), file=f)
     print(write_markdown_table(moments, title=titles, index=index, align='c'))

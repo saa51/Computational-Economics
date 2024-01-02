@@ -1,0 +1,4 @@
+*.bbl
+*.aux
+*.synctex.gz
+reports/*.log
