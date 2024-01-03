@@ -21,26 +21,26 @@ class Huggett1996Env:
         'theta': 0.1
     }
 
-    def __init__(self, params):
+    def __init__(self, **kwargs):
         # parameters
-        self.alpha = params.get('alpha', Huggett1996Env._default_params['alpha'])
-        self.beta = params.get('beta', Huggett1996Env._default_params['beta'])
-        self.sigma = params.get('sigma', Huggett1996Env._default_params['sigma'])
-        self.delta = params.get('delta', Huggett1996Env._default_params['delta'])
-        self.n = params.get('n', Huggett1996Env._default_params['n'])
-        self.N = params.get('N', Huggett1996Env._default_params['N'])
-        self.A = params.get('A', Huggett1996Env._default_params['A'])
-        self.a_bar = params.get('a_bar', Huggett1996Env._default_params['a_bar'])
-        self.R = params.get('R', Huggett1996Env._default_params['R'])
-        self.GY_ratio = params.get('GY_ratio', Huggett1996Env._default_params['GY_ratio'])
-        self.theta = params.get('theta', Huggett1996Env._default_params['theta'])
-        self.tol = params.get('tol', Huggett1996Env._default_params['tol'])
+        self.alpha = kwargs.get('alpha', Huggett1996Env._default_params['alpha'])
+        self.beta = kwargs.get('beta', Huggett1996Env._default_params['beta'])
+        self.sigma = kwargs.get('sigma', Huggett1996Env._default_params['sigma'])
+        self.delta = kwargs.get('delta', Huggett1996Env._default_params['delta'])
+        self.n = kwargs.get('n', Huggett1996Env._default_params['n'])
+        self.N = kwargs.get('N', Huggett1996Env._default_params['N'])
+        self.A = kwargs.get('A', Huggett1996Env._default_params['A'])
+        self.a_bar = kwargs.get('a_bar', Huggett1996Env._default_params['a_bar'])
+        self.R = kwargs.get('R', Huggett1996Env._default_params['R'])
+        self.GY_ratio = kwargs.get('GY_ratio', Huggett1996Env._default_params['GY_ratio'])
+        self.theta = kwargs.get('theta', Huggett1996Env._default_params['theta'])
+        self.tol = kwargs.get('tol', Huggett1996Env._default_params['tol'])
 
         # data
-        self.zvec = params['zvec']
-        self.pimat = params['pimat']
-        self.yvec = params['yvec']
-        self.z1prob = params['z1probvec']
+        self.zvec = kwargs['zvec']
+        self.pimat = kwargs['pimat']
+        self.yvec = kwargs['yvec']
+        self.z1prob = kwargs['z1probvec']
         self.znum = len(self.zvec)
 
         # stationary equilibrium
@@ -61,10 +61,10 @@ class Huggett1996Env:
 
     def solve_decision_rule(self, amax, anum, w, r, b, tau, a_adj=0.1):
         # non-linear grids
-        a_grids = np.linspace(np.log(a_adj - self.a_bar), np.log(a_adj + amax), anum)
-        a_grids = np.exp(a_grids) - a_adj
+        # a_grids = np.linspace(np.log(a_adj - self.a_bar), np.log(a_adj + amax), anum)
+        # a_grids = np.exp(a_grids) - a_adj
         # linear grids
-        # a_grids = np.linspace(-self.a_bar, amax, anum)
+        a_grids = np.linspace(-self.a_bar, amax, anum)
         value_mat = np.zeros((self.N, anum, self.znum))
         policy_mat = np.zeros((self.N, anum, self.znum), dtype=int)
         consumption_mat = np.zeros((self.N, anum, self.znum))
@@ -82,21 +82,16 @@ class Huggett1996Env:
         for t in range(self.N - 2, -1, -1):
             b_t = 0 if t < self.R - 1 else b
             labor_income_mat[t] = (1 - self.theta - tau) * w * self.yvec[t] * np.kron(self.zvec.reshape((1, -1)), np.ones((anum, 1)))
-            total_income_mat[t] = a_grids.reshape((-1, 1)) * (r * (1 - tau)) + \
-                (1 - self.theta - tau) * w * self.yvec[t] * self.zvec.reshape((1, -1)) + b_t    # a, z
-            cash_on_hand = a_grids.reshape((-1, 1)) * (1 + r * (1 - tau)) + \
-                (1 - self.theta - tau) * w * self.yvec[t] * self.zvec.reshape((1, -1)) + b_t    # a, z
+            total_income_mat[t] = a_grids.reshape((-1, 1)) * r * (1 - tau) + labor_income_mat[t] + b_t    # a, z
+            cash_on_hand = (a_grids * (1 - self.delta) + total_income_mat[t].T).T    # a, z
             future_value = np.dot(value_mat[t + 1], self.pimat.transpose())     # a', z
-            future_value = np.kron(np.ones(anum), future_value.transpose()).reshape((anum, self.znum, anum))    # a, z, a'
-            c_mat = np.kron(cash_on_hand, np.ones(anum)).reshape((anum, self.znum, anum)) -\
-                    np.kron(np.ones((anum, self.znum)), a_grids).reshape((anum, self.znum, anum))
+            c_mat = np.tile(np.expand_dims(cash_on_hand, axis=-1), (1, 1, anum)) - a_grids
             c_mat = np.maximum(c_mat, 1e-10)
             u_mat = self.utility(c_mat)     # a, z, a'
-            value_mat[t] = np.max(u_mat + self.beta * future_value, axis=2)
-            policy_mat[t] = np.argmax(u_mat + self.beta * future_value, axis=2)
+            value_mat[t] = np.max(u_mat + self.beta * future_value.T, axis=2)
+            policy_mat[t] = np.argmax(u_mat + self.beta * future_value.T, axis=2)
 
-            for a, z in product(range(anum), range(self.znum)):
-                consumption_mat[t][a][z] = c_mat[a][z][policy_mat[t][a][z]]
+            consumption_mat[t] = np.take_along_axis(c_mat, np.expand_dims(policy_mat[t], axis=-1), axis=-1).squeeze(axis=-1)
 
         return a_grids, policy_mat, value_mat, total_income_mat, labor_income_mat, consumption_mat
 
@@ -118,14 +113,15 @@ class Huggett1996Env:
         self.mu_vec = self.mu_vec / np.sum(self.mu_vec)
 
         # labor supply
-        z_dists = []
-        z_dist = self.z1prob
-        for c in range(self.N):
-            z_dists.append(z_dist)
-            z_dist = np.dot(z_dist, self.pimat)
-        z_dists = np.stack(z_dists)
-        mean_z = np.dot(z_dists, self.zvec)
-        self.agg_labor = np.sum(mean_z * self.yvec * self.mu_vec)
+        if self.agg_labor is None:
+            z_dists = []
+            z_dist = self.z1prob
+            for c in range(self.N):
+                z_dists.append(z_dist)
+                z_dist = np.dot(z_dist, self.pimat)
+            z_dists = np.stack(z_dists)
+            mean_z = np.dot(z_dists, self.zvec)
+            self.agg_labor = np.sum(mean_z * self.yvec * self.mu_vec)
 
         r = r_init
         start_time = time.time()
@@ -141,17 +137,16 @@ class Huggett1996Env:
                 self.solve_decision_rule(amax, anum, w, r, b, tau)
 
             total_dists = self.gen_stationary_distribution(avec, policy_mat)
+
             dists = np.sum(total_dists, axis=2)
             agg_a = np.sum(np.dot(self.mu_vec, np.dot(dists, avec)))
             r_supply = self.A * self.alpha * (self.agg_labor / agg_a) ** (1 - self.alpha) - self.delta
 
             if log:
-                print('Time {}, Iter {}: demand r {}, supply r {}.\nAggregate capital {}, aggregate savings {}.'.format(time.time() - start_time, iter, r, r_supply, agg_k, agg_a))
-                print('output {}, wage {}, transfer {}, tax rate {}, aggregate labor {}.'.format(y, w, b, tau, self.agg_labor))
+                print(f'Time {time.time() - start_time:.4f}, Iter {iter}: demand r {r:.4f}, supply r {r_supply:.4f}.\nAggregate capital {agg_k:.4f}, aggregate savings {agg_a:.4f}.')
+                print(f'output {y:.4f}, wage {w:.4f}, transfer {b:.4f}, tax rate {tau:.4f}, aggregate labor {self.agg_labor:.4f}.')
 
             if np.abs(r - r_supply) < self.tol:
-                if log:
-                    print('a grids:', avec)
                 self.avec = avec
                 self.anum = len(avec)
                 self.policy_mat = policy_mat
