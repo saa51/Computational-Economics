@@ -5,6 +5,9 @@ from scipy.optimize import minimize_scalar, root_scalar
 from RandomProcess import FiniteMarkov
 from FunctionApprox import SplineApprox
 import matplotlib.pyplot as plt
+from joblib import Parallel, delayed
+from itertools import product
+from functools import partial
 
 
 class SOGENV:
@@ -18,17 +21,17 @@ class SOGENV:
         'tol': 1e-5
     }
 
-    def __init__(self, normalized=True, params=None):
+    def __init__(self, normalized=True, **kwargs):
         # parameters
-        if params is None:
-            params = {}
-        self.alpha = params.get('alpha', SOGENV._default_params['alpha'])
-        self.beta = params.get('beta', SOGENV._default_params['beta'])
-        self.rho = params.get('rho', SOGENV._default_params['rho'])
-        self.sigma = params.get('sigma', SOGENV._default_params['sigma'])
-        self.delta = params.get('delta', SOGENV._default_params['delta'])
-        self.gamma = params.get('gamma', SOGENV._default_params['gamma'])
-        self.tol = params.get('tol', SOGENV._default_params['tol'])
+        self.alpha = kwargs.get('alpha', SOGENV._default_params['alpha'])
+        self.beta = kwargs.get('beta', SOGENV._default_params['beta'])
+        self.rho = kwargs.get('rho', SOGENV._default_params['rho'])
+        self.sigma = kwargs.get('sigma', SOGENV._default_params['sigma'])
+        self.delta = kwargs.get('delta', SOGENV._default_params['delta'])
+        self.gamma = kwargs.get('gamma', SOGENV._default_params['gamma'])
+        self.tol = kwargs.get('tol', SOGENV._default_params['tol'])
+
+        self._show = kwargs.get('show', False)
 
         if normalized:
             self.y_ss = 1
@@ -54,6 +57,11 @@ class SOGENV:
 
     def utility(self, c):
         return c ** (1 - self.gamma) / (1 - self.gamma) if self.gamma != 1 else np.log(c)
+
+    def mqp(self, new_v, old_v):
+        b_up = self.beta / (1 - self.beta) * np.max(new_v - old_v)
+        b_low = self.beta / (1 - self.beta) * np.min(new_v - old_v)
+        return new_v + (b_up + b_low) / 2
 
     def value_func_iter(self, nk, na, width, m=3, **optimize_params):
         a_grids, trans_mat = Tauchen(self.rho, self.sigma ** 2, self.a_mean).approx(na, m)
@@ -94,17 +102,14 @@ class SOGENV:
                     value_mat = np.broadcast_to(trans_mat @ local_vmat.T, (nk, na, nk))
                     value_mat = local_u + self.beta * np.take_along_axis(value_mat, np.expand_dims(policy_mat, axis=-1), axis=-1).squeeze(axis=-1)
                     if mqp:
-                        b_up = self.beta / (1 - self.beta) * np.max(value_mat - local_vmat)
-                        b_low = self.beta / (1 - self.beta) * np.min(value_mat - local_vmat)
-                        value_mat = value_mat + (b_up + b_low) / 2
+                        value_mat = self.mqp(value_mat, local_vmat)
+
             else:
                 value_mat = np.max(u_mat + self.beta * np.dot(trans_mat, old_value_mat.transpose()), axis=-1)
                 policy_mat = np.argmax(u_mat + self.beta * np.dot(trans_mat, old_value_mat.transpose()), axis=-1)
 
                 if mqp:
-                    b_up = self.beta / (1 - self.beta) * np.max(value_mat - old_value_mat)
-                    b_low = self.beta / (1 - self.beta) * np.min(value_mat - old_value_mat)
-                    value_mat = value_mat + (b_up + b_low) / 2
+                    value_mat = self.mqp(value_mat, old_value_mat)
             
         policy_mat = np.argmax(u_mat + self.beta * np.dot(trans_mat, old_value_mat.transpose()), axis=-1)
         self.value_mat, self.policy_mat = value_mat, k_grids[policy_mat]
@@ -120,6 +125,7 @@ class SOGENV:
         policy_mat = np.zeros((nk, na), dtype=float)
         k_grids = np.linspace(k_min, k_max, nk, endpoint=True)
         value_func = [ChebyshevApprox(self.k_ss, width + 1e-6, deg) for _ in range(na)]
+        #value_func = ChebyshevApprox2D(deg, na, self.k_ss, np.mean(a_grids), width + 1e-6, (a_grids.max() - a_grids.min()) / 2 + 1e-6)
         self.k_grids = k_grids
 
         if 'HPI' in optimize_params.get('methods', []):
@@ -132,11 +138,28 @@ class SOGENV:
             hpi_policy_iter = 0
         mqp = 'MQP' in optimize_params.get('methods', [])
 
-        k, a, idxa = 0, 0, 0
+        def local_solve(value_func, item):
+            itemk, itema = item
+            idxk, k = itemk
+            idxa, a = itema
 
-        def opposite_value(k_prime):
-            return -(self.utility(np.exp(a) * k ** self.alpha + (1 - self.delta) * k - k_prime) +
-                     self.beta * np.sum(np.array([value_func[i].eval(k_prime) for i in range(na)]) * trans_mat[idxa]))
+            def opposite_value(k_prime):
+                return -(self.utility(np.exp(a) * k ** self.alpha + (1 - self.delta) * k - k_prime) +
+                        self.beta * np.sum(np.array([value_func[i].eval(k_prime) for i in range(na)]) * trans_mat[idxa]))
+            cash = np.exp(a) * k ** self.alpha + (1 - self.delta) * k
+            res = minimize_scalar(opposite_value, bounds=(k_min, min(cash, k_max)), method='bounded')
+            return -res.fun, res.x
+
+        def local_iter(value_func, policy_mat, item):
+            itemk, itema = item
+            idxk, k = itemk
+            idxa, a = itema
+
+            def opposite_value(k_prime):
+                return -(self.utility(np.exp(a) * k ** self.alpha + (1 - self.delta) * k - k_prime) +
+                        self.beta * np.sum(np.array([value_func[i].eval(k_prime) for i in range(na)]) * trans_mat[idxa]))
+            return -opposite_value(policy_mat[idxk][idxa])
+        n_jobs = optimize_params.get('n_jobs', 6)
 
         old_value_mat = np.random.random((nk, na))
 
@@ -147,21 +170,26 @@ class SOGENV:
             old_value_mat = np.copy(value_mat)
 
             if hpi and (iter % (hpi_value_iter + hpi_policy_iter)) >= hpi_value_iter:
-                for idxk, k in enumerate(k_grids):
-                    for idxa, a in enumerate(a_grids):
-                        value_mat[idxk][idxa] = -opposite_value(policy_mat[idxk][idxa])
+                partial_iter = partial(local_iter, value_func, policy_mat)
+                if 'parallel' not in optimize_params.get('methods', []):
+                    res = map(partial_iter, list(product(enumerate(k_grids), enumerate(a_grids))))                    
+                else:
+                    res = Parallel(n_jobs=n_jobs)(delayed(partial_iter)(x) for x in product(enumerate(k_grids), enumerate(a_grids)))
+                value_mat = np.array(list(res)).reshape((nk, na))
             else:
-                for idxk, k in enumerate(k_grids):
-                    for idxa, a in enumerate(a_grids):
-                        cash = np.exp(a) * k ** self.alpha + (1 - self.delta) * k
-                        res = minimize_scalar(opposite_value, bounds=(k_min, min(cash, k_max)), method='bounded')
-                        value_mat[idxk][idxa] = -res.fun
-                        policy_mat[idxk][idxa] = res.x
+                partial_solve = partial(local_solve, value_func)
+                if 'parallel' not in optimize_params.get('methods', []):
+                    res = list(map(partial_solve, list(product(enumerate(k_grids), enumerate(a_grids)))))
+                else:
+                    res = Parallel(n_jobs=n_jobs)(delayed(partial_solve)(x) for x in product(enumerate(k_grids), enumerate(a_grids)))
+                    res = list(res)
+                value_mat = np.array([x for x, y in res])
+                value_mat = value_mat.reshape((nk, na))
+                policy_mat = np.array([y for x, y in res])
+                policy_mat = policy_mat.reshape((nk, na))
 
             if mqp:
-                b_up = self.beta / (1 - self.beta) * np.max(value_mat - old_value_mat)
-                b_low = self.beta / (1 - self.beta) * np.min(value_mat - old_value_mat)
-                value_mat = value_mat + (b_up + b_low) / 2
+                value_mat = self.mqp(value_mat, old_value_mat)
 
             for idxa, func in enumerate(value_func):
                 func.approx(value_mat[:, idxa], self.k_grids)
@@ -348,7 +376,10 @@ class SOGENV:
         plt.title('Value Function: ' + title)
         if fname is not None:
             plt.savefig(fname)
-        plt.show()
+        if self._show:
+            plt.show()
+        else:
+            plt.clf()
 
     def plot_policy(self, title='', fname=None):
         if self.policy_mat is None:
@@ -362,7 +393,10 @@ class SOGENV:
         plt.title('Policy Function: ' + title)
         if fname is not None:
             plt.savefig(fname)
-        plt.show()
+        if self._show:
+            plt.show()
+        else:
+            plt.clf()
 
     def plot_capital_diff(self, title='', fname=None):
         if self.policy_mat is None:
@@ -375,7 +409,10 @@ class SOGENV:
         plt.title('Capital Difference: ' + title)
         if fname is not None:
             plt.savefig(fname)
-        plt.show()
+        if self._show:
+            plt.show()
+        else:
+            plt.clf()
 
     def plot_euler_err(self, title='', fname=None):
         na = self.a_grids.size
@@ -390,7 +427,10 @@ class SOGENV:
         plt.title('Euler Error: ' + title)
         if fname is not None:
             plt.savefig(fname)
-        plt.show()
+        if self._show:
+            plt.show()
+        else:
+            plt.clf()
         return errs
 
     def plot_value_derivative(self, title='', fname=None):
@@ -403,7 +443,10 @@ class SOGENV:
         plt.title('Value Function Derivative: ' + title)
         if fname is not None:
             plt.savefig(fname)
-        plt.show()
+        if self._show:
+            plt.show()
+        else:
+            plt.clf()
 
     def plot_value_2derivative(self, title='', fname=None):
         if self.value_mat is None:
@@ -416,7 +459,10 @@ class SOGENV:
         plt.title('Value Function 2nd Derivative: ' + title)
         if fname is not None:
             plt.savefig(fname)
-        plt.show()
+        if self._show:
+            plt.show()
+        else:
+            plt.clf()
 
     def plot_policy_derivative(self, title='', fname=None):
         if self.value_mat is None:
@@ -428,7 +474,10 @@ class SOGENV:
         plt.title('Policy Function Derivative: ' + title)
         if fname is not None:
             plt.savefig(fname)
-        plt.show()
+        if self._show:
+            plt.show()
+        else:
+            plt.clf()
 
     def plot_policy_2derivative(self, title='', fname=None):
         if self.value_mat is None:
@@ -441,7 +490,10 @@ class SOGENV:
         plt.title('Policy Function 2nd Derivative: ' + title)
         if fname is not None:
             plt.savefig(fname)
-        plt.show()
+        if self._show:
+            plt.show()
+        else:
+            plt.clf()
 
 if __name__ == '__main__':
     SOGENV()
