@@ -126,7 +126,7 @@ class Huggett1996Env:
         r = r_init
         start_time = time.time()
         for iter in range(max_iter):
-            agg_k = ((r + self.delta) / self.alpha / self.A) ** (1 / (self.alpha - 1)) * self.agg_labor
+            agg_k = (r / self.alpha / self.A) ** (1 / (self.alpha - 1)) * self.agg_labor
             w = self.A * (1 - self.alpha) * (agg_k / self.agg_labor) ** self.alpha
             b = self.theta * w * self.agg_labor / np.sum(self.mu_vec[self.R - 1:])
             y = self.A * agg_k ** self.alpha * self.agg_labor ** (1 - self.alpha)

@@ -21,7 +21,7 @@ if __name__ == '__main__':
     print('Gini index:', env.gini_index())
     percentiles = [0.01, 0.05, 0.2, 0.4, 0.6, 0.8]
     for p in percentiles:
-        print(f'percentile {p}, {1 - env2.lorenz_curve.eval(1 - p)}')
+        print(f'percentile {p}, {1 - env.lorenz_curve.eval(1 - p)}')
 
     params['n'] = 0.001
     env2 = Huggett1996Env(**params)
