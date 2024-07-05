@@ -3,10 +3,8 @@ from MarkovApprox import Rowenhorst, Tauchen, TauchenHussey
 from FunctionApprox import ChebyshevApprox2D
 import matplotlib.pyplot as plt
 from RandomProcess import AR1Process
-from tqdm import tqdm
-import tempfile, os
-from joblib import Parallel, delayed
-from itertools import product
+from tqdm import tqdm, trange
+import warnings
 
 default_params = {
     'rho': 0.979,
@@ -57,53 +55,42 @@ class OptimalGrowthEnv:
         return np.exp(a) * k_old ** self.alpha + (1 - self.delta) * k_old - c
 
     def utility(self, c):
-        return c ** (1 - self.gamma) / (1 - self.gamma) if self.gamma != 1 else np.log(c)
+        u = np.zeros_like(c)
+        u[c > 0] = c[c > 0] ** (1 - self.gamma) / (1 - self.gamma) if self.gamma != 1 else np.log(c[c > 0])
+        u[c <= 0] = -np.inf
+        return u
 
     def resource(self, k, a):
         return np.exp(a) * k ** self.alpha + (1 - self.delta) * k
 
-    def grid_search(self, n_k, k_width, n_a, c_grids_width, n_threads=1):
+    def grid_search(self, n_k, k_width, n_a, c_grids_width):
         a_grids, trans_mat = Rowenhorst(self.rho, self.sigma ** 2, 0).approx(n_a)
         self.a_grids, self.trans_mat = a_grids, trans_mat
-        a_width = (np.max(a_grids) - np.min(a_grids)) / 2
+        a_width = (np.max(a_grids) - np.min(a_grids)) / 2 + 1e-3
         a_center = (np.max(a_grids) + np.min(a_grids)) / 2
+        k_prime_grids = np.arange(self.k_ss - k_width, self.k_ss + k_width, c_grids_width)
 
         value_func = ChebyshevApprox2D(n_k, n_a, self.k_ss, a_center, k_width, a_width, grid2=a_grids)
-
-        old_weights = np.random.random((1, n_k * n_a))
-        if n_threads == 1:
-            policy_func = np.zeros((n_k, n_a))
-            new_values = np.zeros((n_k, n_a))
-        else:
-            path = tempfile.mkdtemp()
-            value_path = os.path.join(path, 'value.temp')
-            new_values = np.memmap(value_path, dtype=float, shape=(n_k, n_a), mode='w+')
-            policy_path = os.path.join(path, 'policy.temp')
-            policy_func = np.memmap(policy_path, dtype=float, shape=(n_k, n_a), mode='w+')
         k_grids, a_grids = value_func.real_grids()
+        resource = np.exp(a_grids).reshape((-1, 1)) * k_grids.reshape((1, -1)) ** self.alpha + (1 - self.delta) * k_grids
+        resource = resource.T.reshape((n_k, n_a, 1))
+        u_mat = self.utility(resource - k_prime_grids)
 
-        def update_value(i, j):
-            k = k_grids[i]
-            a = a_grids[j]
-            y = self.resource(k, a)
-            k_primes = np.arange(self.k_ss - k_width, min(y, self.k_ss + k_width), c_grids_width)
-            v_primes = np.zeros(k_primes.size)
-            for idxk, k_prime in enumerate(k_primes):
-                for idxa, a_prime in enumerate(a_grids):
-                    v_primes[idxk] += value_func.eval(k_prime, a_prime) * trans_mat[j][idxa]
-            v = self.utility(y - k_primes) + self.beta * v_primes
-            new_values[i][j] = np.max(v)
-            policy_func[i][j] = k_primes[np.argmax(v)]
-
+        old_weights = np.random.random(n_k * n_a)
+        policy_func = np.zeros((n_k, n_a))
+        new_values = np.zeros((n_k, n_a))
+        t = trange(10000, desc='Bar desc', leave=True)
         while not np.allclose(value_func.weights, old_weights, atol=self.tol, rtol=self.tol):
-            print(np.sum(np.abs(value_func.weights - old_weights)))
             old_weights = np.copy(value_func.weights)
-            if n_threads == 1:
-                for i, j in product(range(len(k_grids)), range(len(a_grids))):
-                    update_value(i, j)
-            else:
-                Parallel(n_jobs=n_threads)(delayed(update_value)(i, j) for i, j in product(range(len(k_grids)), range(len(a_grids))))
+            v_prime = value_func(k_prime_grids, a_grids)
+            new_values = u_mat + self.beta * trans_mat @ v_prime.T
+            max_idx = np.argmax(new_values, axis=-1)
+            new_values = np.take_along_axis(new_values, np.expand_dims(max_idx, axis=-1), axis=-1)
+            policy_func = k_prime_grids[max_idx]
             value_func.approx(new_values)
+
+            t.set_description(f'grid search: {np.sum(np.abs(value_func.weights - old_weights))}')
+            t.update()
         self.policy_func = policy_func
         self.value_func = new_values
         self.k_grids = value_func.grid1 * k_width + self.k_ss
@@ -118,66 +105,58 @@ class OptimalGrowthEnv:
         else:
             a_grids, trans_mat = Rowenhorst(self.rho, self.sigma ** 2, 0).approx(n_a)
         self.a_grids, self.trans_mat =  a_grids, trans_mat
-        a_width = (np.max(a_grids) - np.min(a_grids)) / 2
+        a_width = (np.max(a_grids) - np.min(a_grids)) / 2 + 1e-3
         a_center = (np.max(a_grids) + np.min(a_grids)) / 2
 
-        policy_func = ChebyshevApprox2D(n_k, n_a, self.k_ss, a_center, k_width, a_width, grid2=a_grids)
-        value_func = ChebyshevApprox2D(n_k, n_a, self.k_ss, a_center, k_width, a_width, grid2=a_grids)
+        policy_func = ChebyshevApprox2D(n_k, n_a, self.k_ss, a_center, k_width, a_width, grid1=None, grid2=a_grids)
+        value_func = ChebyshevApprox2D(n_k, n_a, self.k_ss, a_center, k_width, a_width, grid1=None, grid2=a_grids)
         k_grids, a_grids = value_func.real_grids()
 
-        old_weights = np.random.random((1, n_k * n_a))
-        new_policy = np.zeros((n_k, n_a))
-        policy_func.approx(self.c_ss * np.ones((n_k, n_a)))
+        old_weights = np.random.random(n_k * n_a)
+        resource = np.exp(a_grids).reshape((-1, 1)) * k_grids.reshape((1, -1)) ** self.alpha + (1 - self.delta) * k_grids
+        policy_func.approx(self.k_ss * np.ones((n_k, n_a)))
+
+        t = trange(10000, desc='Bar desc', leave=True)
 
         while not np.allclose(policy_func.weights, old_weights, atol=self.tol):
-            new_policy = np.zeros((n_k, n_a))
-            print('Policy Loss:', np.sum(np.abs(policy_func.weights - old_weights)))
+            loss = np.sum(np.abs(policy_func.weights - old_weights))
+            if not np.isfinite(loss):
+                raise RuntimeError('not converge')
+            t.set_description(f'policy loss: {np.sum(np.abs(policy_func.weights - old_weights))}')
+            t.update()
             old_weights = np.copy(policy_func.weights)
 
-            for i, k in enumerate(k_grids):
-                for j, a in enumerate(a_grids):
-                    c = np.exp(policy_func.eval(k, a))
-                    k_prime = self.k_new(k, a, c)
+            k_prime = policy_func(k_grids, a_grids)   # (n_k, n_a)
+            k_2prime = (policy_func(k_prime, a_grids)) # (n_k, n_a, n_a')
+            resource_ = (k_prime.reshape((n_k, n_a, 1)) ** self.alpha @ np.exp(a_grids).reshape((1, -1))).transpose(2, 0, 1) + (1 - self.delta) * k_prime
+            resource_ = resource_.transpose(1, 2, 0)
+            c_prime = resource_ - k_2prime
+            mu_prime = c_prime ** (-self.gamma) * (self.alpha * np.expand_dims(k_prime, axis=-1) ** (self.alpha - 1) * np.exp(a_grids) + 1 - self.delta)
+            mu = (mu_prime * trans_mat).sum(axis=-1) * self.beta
+            new_policy = resource.T - mu ** (-1 / self.gamma)
+            policy_func.approx(new_policy, lr=0.2)
 
-                    if k_prime < self.k_ss - k_width:
-                        #new_policy[i][j] = np.log(self.resource(k, a) - self.k_ss + k_width - 1e-6)
-                        new_policy[i][j] = np.log(self.resource(k, a) - k)
-                        continue
-                    if k_prime > self.k_ss + k_width:
-                        new_policy[i][j] = np.log(self.resource(k, a) - self.k_ss - k_width + 1e-6)
-                        continue
 
-                    mu_prime = 0
-                    for idxa, a_prime in enumerate(a_grids):
-                        c_prime = np.exp(policy_func.eval(k_prime, a_prime))
-                        k_return = np.exp(a_prime) * self.alpha * k_prime ** (self.alpha - 1) + 1 - self.delta
-                        mu_prime += self.beta * c_prime ** (-self.gamma) * k_return * trans_mat[j][idxa]
-                    new_policy[i][j] = - 1 / self.gamma * np.log(mu_prime)
-            policy_func.approx(new_policy, lr=.5)
-
-        self.policy_func = np.zeros((n_k, n_a))
-        for i, k in enumerate(k_grids):
-            for j, a in enumerate(a_grids):
-                #self.policy_func[i][j] = self.resource(k_t * k_width + self.k_ss, a_t * a_width + a_center) - new_policy[i][j] ** (-1 / self.gamma)
-                self.policy_func[i][j] = self.k_new(k, a, np.exp(new_policy[i][j]))
+        self.policy_func = policy_func(k_grids, a_grids)
         self.policy_func_cheby = policy_func
         self.k_grids = k_grids
 
-        old_weights = np.random.random((1, n_k * n_a))
+        c = resource.T - self.policy_func
+        u = self.utility(c)
+        k_prime = self.policy_func
+
+        old_weights = np.random.random((n_k * n_a))
         new_values = np.zeros((n_k, n_a))
+
+        t = trange(10000, desc='Bar desc', leave=True)
+
         while not np.allclose(value_func.weights, old_weights, atol=self.tol, rtol=self.tol):
-            print('Value Loss:', np.sum(np.abs(value_func.weights - old_weights)))
+            t.set_description(f'value loss: {np.sum(np.abs(value_func.weights - old_weights))}')
+            t.update()
             old_weights = np.copy(value_func.weights)
-            k_grids, a_grids = value_func.real_grids()
-            for i, k in enumerate(k_grids):
-                for j, a in enumerate(a_grids):
-                    k_prime = self.policy_func[i][j]
-                    c = self.resource(k, a) - k_prime
-                    v_prime = 0
-                    for idxa, a_prime in enumerate(a_grids):
-                        v_prime += value_func.eval(k_prime, a_prime) * trans_mat[j][idxa]
-                    new_values[i][j] = self.utility(c) + self.beta * v_prime
-            value_func.approx(new_values, lr=0.2)
+            v_prime = value_func(k_prime, a_grids)
+            new_values = u + self.beta * (v_prime * trans_mat).sum(axis=-1)
+            value_func.approx(new_values, lr=1.)
         self.value_func = new_values
         self.value_func_cheby = value_func
         #print(self.value_func_cheby.eval(self.k_ss, 0))
@@ -187,76 +166,60 @@ class OptimalGrowthEnv:
         print('K:', self.k_ss)
         print('C:', self.c_ss)
 
-    def plot_policy(self, offgrid=False):
+    def plot_policy(self, grid_num=100, offgrid=True):
         if self.policy_func is None:
             return None
         if self.policy_func_cheby is None:
             offgrid = False
-        for idxa in range(self.policy_func.shape[1]):
-            a = self.a_grids[idxa]
-            if offgrid:
-                k_grids = np.linspace(np.min(self.k_grids), np.max(self.k_grids), 100, endpoint=True)
-                c_grids = np.zeros(k_grids.size)
-                for idxk, k in enumerate(k_grids):
-                    c_grids[idxk] = np.exp(self.policy_func_cheby.eval(k, a))
-                k_prime = self.k_new(k_grids, a, c_grids)
-                plt.plot(k_grids, k_prime, label=str(round(a, 2)))
-                plt.scatter(self.k_grids, self.policy_func[:, idxa], color='red')
-            else:
-                plt.plot(self.k_grids, self.policy_func[:, idxa], label=str(round(a, 2)))
+        k_grids = np.linspace(np.min(self.k_grids), np.max(self.k_grids), grid_num, endpoint=True) if offgrid \
+                else self.k_grids
+        k_prime = self.policy_func_cheby(k_grids, self.a_grids) if self.policy_func_cheby else self.policy_func
+        for idxa, a in enumerate(self.a_grids):
+            plt.plot(k_grids, k_prime[:, idxa], label=str(round(a, 2)))
+            plt.scatter(self.k_grids, self.policy_func[:, idxa], color='red')
         plt.plot(self.k_grids, self.k_grids, label='45 degree')
         plt.scatter([self.k_ss], [self.k_ss])
         plt.legend()
         plt.title('Capital Accumulation')
         plt.show()
 
-    def plot_value(self, offgrid=False):
+    def plot_value(self, grid_num=100, offgrid=True):
         if self.value_func is None:
             return None
         if self.value_func_cheby is None:
             offgrid = False
-        for idxa in range(self.value_func.shape[1]):
-            a = self.a_grids[idxa]
-            if offgrid:
-                k_grids = np.linspace(np.min(self.k_grids), np.max(self.k_grids), 100, endpoint=True)
-                values = np.zeros(k_grids.size)
-                for idxk, k in enumerate(k_grids):
-                    values[idxk] = self.value_func_cheby.eval(k, a)
-                plt.plot(k_grids, values, label=str(round(a, 2)))
-                plt.scatter(self.k_grids, self.value_func[:, idxa], color='red')
-            else:
-                plt.plot(self.k_grids, self.value_func[:, idxa], label=str(round(a, 2)))
+        k_grids = np.linspace(np.min(self.k_grids), np.max(self.k_grids), grid_num, endpoint=True) if offgrid \
+                else self.k_grids
+        value = self.value_func_cheby(k_grids, self.a_grids) if self.value_func_cheby else self.value_func
+        for idxa, a in enumerate(self.a_grids):
+            plt.plot(k_grids, value[:, idxa], label=str(round(a, 2)))
+            plt.scatter(self.k_grids, self.value_func[:, idxa], color='red')
         plt.legend()
         plt.title('Value Function')
         plt.show()
 
-    def plot_consumption(self, offgrid=True):
+    def plot_consumption(self, grid_num=100, offgrid=True):
         if self.policy_func is None:
             return None
         if self.policy_func_cheby is None:
             offgrid = False
-        for idxa in range(self.policy_func.shape[1]):
-            a = self.a_grids[idxa]
-            if offgrid:
-                k_grids = np.linspace(np.min(self.k_grids), np.max(self.k_grids), 100, endpoint=True)
-                consumptions = np.zeros(k_grids.size)
-                for idxk, k in enumerate(k_grids):
-                    consumptions[idxk] = np.exp(self.policy_func_cheby.eval(k, a))
-                plt.plot(k_grids, consumptions, label=str(round(a, 2)))
-
-            consumptions = np.zeros(self.k_grids.size)
-            for idxk, k in enumerate(self.k_grids):
-                consumptions[idxk] = self.resource(k, a) - self.policy_func[idxk][idxa]
-            if offgrid:
-                plt.scatter(self.k_grids, consumptions, color='red')
-            else:
-                plt.plot(self.k_grids, consumptions, label=str(round(a, 2)))
+        k_grids = np.linspace(np.min(self.k_grids), np.max(self.k_grids), grid_num, endpoint=True) if offgrid \
+                else self.k_grids
+        k_prime = self.policy_func_cheby(k_grids, self.a_grids) if self.policy_func_cheby else self.policy_func
+        resource = np.expand_dims(np.exp(self.a_grids), axis=-1) * k_grids ** self.alpha + (1 - self.delta) * k_grids
+        c = resource.T - k_prime
+        resource = np.expand_dims(np.exp(self.a_grids), axis=-1) * self.k_grids ** self.alpha + (1 - self.delta) * self.k_grids
+        c_ = resource.T - self.policy_func
+        for idxa, a in enumerate(self.a_grids):
+            plt.plot(k_grids, c[:, idxa], label=str(round(a, 2)))
+            plt.scatter(self.k_grids, c_[:, idxa], color='red')
         plt.scatter([self.k_ss], [self.c_ss])
         plt.legend()
         plt.title('Consumption')
         plt.show()
 
     def steady_distribution(self, k_grids):
+        warnings.warn('not finished')
         if k_grids[0] > np.min(self.k_grids):
             k_grids = np.concatenate(([self.k_grids[0]], k_grids))
         k_num = k_grids.size
@@ -266,7 +229,7 @@ class OptimalGrowthEnv:
         policy_func = np.zeros((k_num, a_num), dtype=int)
         for idxk, k in enumerate(k_values):
             for idxa, a in enumerate(self.a_grids):
-                c = self.policy_func_cheby.eval(k, a)
+                c = self.policy_func_cheby(k, a)
                 k_prime = self.k_new(k, a, c)
                 policy_func[idxk][idxa] = np.searchsorted(k_grids, k_prime)
         distribution = np.zeros((k_num, a_num))
@@ -283,6 +246,7 @@ class OptimalGrowthEnv:
 
     # incomplete
     def compute_moments(self, grid_num=100):
+        warnings.warn('not finished')
         k_grids = np.linspace(np.min(self.k_grids), np.max(self.k_grids), grid_num)
         dist, k_values = self.steady_distribution(k_grids)
 
@@ -313,31 +277,22 @@ class OptimalGrowthEnv:
     def simulation(self, periods=5010000, a_series=None):
         if a_series is None:
             a_series = AR1Process(rho=self.rho, err_params={'sigma': self.sigma}).simulate(periods, init=0)
-            a_max = np.max(self.a_grids)
-            a_min = np.min(self.a_grids)
-            a_series = np.maximum(a_series, a_min)
-            a_series = np.minimum(a_series, a_max)
-            a_series = a_series[1:]
+            a_series = np.clip(a_series, np.min(self.a_grids), np.max(self.a_grids))[1:]
+
+        k_max = np.max(self.k_grids)
+        k_min = np.min(self.k_grids)
+
         k_series = np.zeros(periods + 1)
         c_series = np.zeros(periods)
         i_series = np.zeros(periods)
         y_series = np.zeros(periods)
         k_series[0] = self.k_ss
 
-        k_max = np.max(self.k_grids)
-        k_min = np.min(self.k_grids)
-        for t in tqdm(range(periods)):
-            c_series[t] = np.exp(self.policy_func_cheby.eval(k_series[t], a_series[t]))
-            k_series[t + 1] = self.k_new(k_series[t], a_series[t], c_series[t])
-            if k_series[t + 1] > k_max:
-                k_series[t + 1] = k_max
-            k_series[t + 1] = max(k_min, k_series[t + 1])
-            c_series[t] = self.resource(k_series[t], a_series[t]) - k_series[t + 1]
+        for t in trange(periods):
+            k_series[t + 1] = self.policy_func_cheby(k_series[t], a_series[t])
+            k_series[t + 1] = np.clip(k_series[t + 1], k_min, k_max)
             y_series[t] = np.exp(a_series[t]) * k_series[t] ** self.alpha
             i_series[t] = k_series[t + 1] - (1 - self.delta) * k_series[t]
+            c_series[t] = y_series[t] - i_series[t]
 
         return a_series, k_series[:-1], c_series, i_series, y_series
-
-
-
-

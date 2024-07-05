@@ -110,7 +110,7 @@ class GrowthWithHabitIACEnv:
                 y = np.exp(a_series[t]) * k_series[t] ** self.alpha
                 # mu = mu_func.eval([[c_series[t - 1], k_series[t], np.exp(a_series[t])]])
                 #print(t, [c_series[t - 1], k_series[t], np.exp(a_series[t])])
-                mu = mu_func.eval([[k_series[t], np.exp(a_series[t])]])
+                mu = mu_func([[k_series[t], np.exp(a_series[t])]])
                 c = mu ** (-1 / self.gamma) + self.b * c_series[t - 1]
                 if k_series[t] > 1 / (self.phi * (1 - self.delta)):
                     #print('there', c, y)
@@ -233,7 +233,11 @@ class GrowthWithHabitIACEnv:
         return mu_func.get_weights()
 
     def utility(self, c, c_last):
-        return (c - self.b * c_last) ** (1 - self.gamma) / (1 - self.gamma) if self.gamma != 1 else np.log(c - self.b * c_last)
+        u = np.zeros_like(c)
+        u[c > self.b * c_last] = (c - self.b * c_last) ** (1 - self.gamma) / (1 - self.gamma) if self.gamma != 1 \
+                                 else np.log(c - self.b * c_last)
+        u[c <= self.b * c_last] = -np.inf
+        return u
 
     def next_state(self, k, i, a=0):
         k_prime = (1 - self.delta) * k + i
@@ -271,7 +275,7 @@ class GrowthWithHabitIACEnv:
             k_primes, cs = self.next_state(k, invests)
             v_primes = np.zeros(k_primes.size)
             for idx in range(len(v_primes)):
-                v_primes[idx] = value_func.eval(k_primes[idx], cs[idx])
+                v_primes[idx] = value_func(k_primes[idx], cs[idx])
                 if not (-k_width <= k_primes[idx] - self.k_ss <= k_width and -c_width <= cs[
                     idx] - self.c_ss <= c_width):
                     print(k_primes[idx], cs[idx], invests[idx])

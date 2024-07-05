@@ -1,4 +1,8 @@
+# latex
 *.bbl
 *.aux
 *.synctex.gz
 reports/*.log
+
+# pycache
+__pycache__
