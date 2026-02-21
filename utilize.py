@@ -1,31 +1,38 @@
+from typing import Any, List, Optional, Tuple
+
 import numpy as np
 
 
-def write_markdown_table(content, title=None, index=None, align='l'):
-    output = ''
+def write_markdown_table(
+    content: List[List[Any]],
+    title: Optional[List[str]] = None,
+    index: Optional[List[str]] = None,
+    align: str = "l",
+) -> str:
+    output = ""
     row_num = len(content)
     col_num = len(content[0])
 
-    def __write_markdown_table_line(content_line):
-        line = '| '
+    def __write_markdown_table_line(content_line: List[Any]) -> str:
+        line = "| "
         for c in content_line:
-            line += str(c) + ' | '
-        line += '\n'
+            line += str(c) + " | "
+        line += "\n"
         return line
 
     if title is None:
-        title = ['column ' + str(i) for i in range(col_num)]
+        title = ["column " + str(i) for i in range(col_num)]
     if index is not None:
-        title = ['index'] + title
+        title = ["index"] + title
         col_num += 1
     output += __write_markdown_table_line(title)
 
-    if align == 'r':
-        pattern = '----:'
-    elif align == 'c':
-        pattern = ':----:'
+    if align == "r":
+        pattern = "----:"
+    elif align == "c":
+        pattern = ":----:"
     else:
-        pattern = ':----'
+        pattern = ":----"
     output += __write_markdown_table_line([pattern for _ in range(col_num)])
     for l in range(row_num):
         if index is not None:
@@ -35,29 +42,36 @@ def write_markdown_table(content, title=None, index=None, align='l'):
     return output
 
 
-def write_latex_table(content, title=None, index=None, align='c', hline=False, vline=False):
-    output = '\\begin{tabular}'
+def write_latex_table(
+    content: List[List[Any]],
+    title: Optional[List[str]] = None,
+    index: Optional[List[str]] = None,
+    align: str = "c",
+    hline: bool = False,
+    vline: bool = False,
+) -> str:
+    output = "\\begin{tabular}"
     row_num = len(content)
     col_num = len(content[0])
     if index is not None:
         col_num += 1
-    format_str = '{|' + (align + ('|' if vline else '')) * col_num
+    format_str = "{|" + (align + ("|" if vline else "")) * col_num
     if not vline:
-        format_str += '|'
-    output += format_str + '}\n\\hline\n'
+        format_str += "|"
+    output += format_str + "}\n\\hline\n"
 
-    def __write_latex_table_line(content_line, hline):
-        line = ''
+    def __write_latex_table_line(content_line: List[Any], hline: bool) -> str:
+        line = ""
         for c in content_line[:-1]:
-            line += str(c) + ' & '
+            line += str(c) + " & "
         line += str(content_line[-1])
-        line += '\\\\\n'
+        line += "\\\\\n"
         if hline:
-            line += '\\hline \n'
+            line += "\\hline \n"
         return line
 
     if title is not None:
-        output += __write_latex_table_line(['index'] + title, hline)
+        output += __write_latex_table_line(["index"] + title, hline)
 
     for l in range(row_num):
         if index is None:
@@ -66,19 +80,26 @@ def write_latex_table(content, title=None, index=None, align='c', hline=False, v
             output += __write_latex_table_line([index[l]] + content[l], hline)
 
     if not hline:
-        output += '\\hline\n'
-    output += '\\end{tabular}\n'
+        output += "\\hline\n"
+    output += "\\end{tabular}\n"
     return output
 
 
-def gen_time_series_moments(data):
+def gen_time_series_moments(
+    data: np.ndarray,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     ar_coef = []
     for v in data:
         ar_coef.append(np.corrcoef(v[1:], v[:-1])[0][1])
-    return np.mean(data, axis=1), np.cov(data), np.corrcoef(data), np.array(ar_coef)
+    return (
+        np.mean(data, axis=1),
+        np.cov(data),
+        np.corrcoef(data),
+        np.array(ar_coef),
+    )
 
 
-def compute_gini(data):
+def compute_gini(data: np.ndarray) -> Tuple[float, np.ndarray]:
     data = np.sort(data)
     cumsum = np.cumsum(data)
     lorenz_curve = cumsum / cumsum[-1]

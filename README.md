@@ -1,206 +1,349 @@
-# Computational-Economics
+# Computational Economics
 
-## Code List
+This repository contains implementations of various computational economics models, including optimal growth models, incomplete markets models, and function approximation methods. The project was developed for coursework in computational economics.
 
-`main.py`: where the problem set 1 should be run.
+## Directory Structure
 
-`problem_set_2.py`: where the problem set 2 should be run.
+```
+Computational-Economics/
+├── main.py                    # Problem Set 1 entry point
+├── problem_set_2.py           # Problem Set 2 entry point  
+├── problem_set_3.py           # Problem Set 3 (Huggett model)
+├── final_project.py           # Final project - income and wealth dynamics
+├── final2.py                  # Final project utilities
+│
+├── Environment Modules (Models)
+├── OptimalGrowth.py           # Solow growth model with AR(1) TFP
+├── SOGEnv.py                  # Stochastic Optimal Growth environment
+├── Huggett1996Env.py          # Huggett (1996) incomplete markets model
+├── GrowthWithHabitIACEnv.py   # Growth model with habit formation & IAC
+├── KrusellSmithEnv.py         # Krusell-Smith (1998) incomplete markets
+├── FuncApproxEnv.py           # Environment for comparing approximation methods
+│
+├── Numerical Methods
+├── FunctionApprox.py          # Function approximation tools
+├── MarkovApprox.py            # Markov chain approximations
+├── RandomProcess.py           # Random process simulation
+│
+├── Utilities
+├── utilize.py                 # Utility functions (tables, Gini, etc.)
+├── menu_cost.py               # Menu cost model
+│
+├── data/                      # Input data files
+├── figures/                   # Generated figures
+│   ├── problem_set_1/
+│   ├── problem_set_2/
+│   ├── problem_set_3/
+│   └── final_project/
+│
+└── reports/                   # LaTeX reports
+```
 
-`SOGEnv.py`: Provide a stochastic optimal growth model environment related to problem set 2.
+---
 
-`OptimalGrowth.py`: Provide a optimal growth model environment and solutions, corresponding to Question 1 in Problem set 1.
+## Core Modules
 
-`FuncApproxEnv.py`: Provide an environment in which Spline, Polynomial, and Cherbyshev approximation are compared, corresponding to Question 2 in Problem set 1.
+### Economic Models
 
-`GrowthWithHabitIACEnv.py`: Provide a growth model with habit utility and investment adjustment cost, corresponding to Question 3 in Problem set 1.
+#### OptimalGrowth.py
+Implements a Solow growth model with AR(1) total factor productivity (TFP) following Kopecky and Suen (2010). Features:
+- Value function iteration with Chebyshev approximation
+- Grid search and Euler equation methods
+- Markov chain approximation of AR(1) process using Rowenhorst method
+- Monte Carlo simulation for moment computation
 
-`FunctionApprox.py`: Some function approximation tools.
+**Key Classes:**
+- `OptimalGrowthEnv`: Main environment class
 
-`MarkovApprox.py`: Using finite state Markov process to approximate AR(1) process.
+**Key Methods:**
+- `grid_search()`: Solve using value function iteration with grid search
+- `euler_method()`: Solve using Euler equation approach
+- `simulation()`: Run Monte Carlo simulation
+- `compute_moments()`: Compute and compare model moments
 
-`RandomProcess.py`: Simulation of some random process, AR(1) only up to now.
+---
 
-`utilize.py`: some tools.
+#### SOGEnv.py
+Stochastic Optimal Growth model environment used in Problem Set 2. Features:
+- Value function iteration
+- Chebyshev approximation
+- Modified Policy Function Iteration (PEA)
+- Endogenous Grid Method (EGM)
 
-## Problem Set 1
+**Key Classes:**
+- `SOGENV`: Main environment class
+- `SOGVFIResult`: Results container with plotting utilities
 
-### Quetion 1
+**Key Methods:**
+- `value_func_iter()`: Standard VFI
+- `value_approx()`: Value function approximation
+- `modified_pea()`: Modified PEA algorithm
+- `endo_grid()`: Endogenous grid method
+- `simulate()`: Simulate model paths
 
-This is a Solow growth model with AR(1) TFP in Kopechy and Suen (2010).
-I use the parameters in their paper.
-The main code is in `OptimalGrowthEnv.py`.
+---
 
-#### Solving a optimal growth model with Chebyshev approximation and grid search
+#### Huggett1996Env.py
+Implements the Huggett (1996) overlapping generations model with incomplete markets. Features:
+- Life-cycle model with borrowing constraints
+- Pension system
+- Stationary equilibrium computation
+- Wealth distribution analysis
 
-The main code for this problem is `OptimalGrowthEnv().grid_search()`.
-I use Chebyshev method to approximate the value function, and search for the optimal consumption to maximize the RHS of the Bellman equation.
+**Key Classes:**
+- `Huggett1996Env`: Main environment class
 
-The AR(1) TFP is approximated by a 7-state Markov process using Rowenhorst method.
-The number of grids for capital is 15.
-The domain of the solution is [0.5, 1.5] * steady state capital.
-And the precision of optimal consumption is 0.01.
+**Key Methods:**
+- `solve_stationary_equilibrium()`: Find equilibrium prices and allocations
+- `gen_stationary_distribution()`: Compute stationary distribution
+- `gini_index()`: Calculate Gini coefficient
+- `plot_Lorenz_curve()`: Visualize inequality
+- `plot_policy()`: Plot decision rules
 
-Following is the optimal consumption, capital accumulation, and value function: 
+---
 
-![image](figures/problem_set_1/q12_v.png)
-![image](figures/problem_set_1/q12_c.png)
-![image](figures/problem_set_1/q12_k.png)
+#### GrowthWithHabitIACEnv.py
+Growth model with habit utility and investment adjustment costs (Problem Set 1, Question 3). Features:
+- Habit formation (internal and external)
+- Investment adjustment costs (IAC)
+- Policy function iteration (PEA)
+- Steady state computation
 
-The X-axis is for capital, and the lines with different colors represent different TFP levels.
+**Key Classes:**
+- `GrowthWithHabitIACEnv`: Main environment class
 
-#### Solving a optimal growth model with Chebyshev approximation and euler equation
+**Key Methods:**
+- `solve_steady_state()`: Compute steady state
+- `pea()`: Policy function iteration
+- `value_func_approx()`: Value function approximation
+- `plot_policy()` / `plot_value()`: Visualization
 
-The main code for this problem is in `OptimalGrowthEnv().Euler_method()`.
-I use Chebshev method to approximate the consumption function given present capital and TFP.
-Then I use RHS of Euler equation to update the consumption function.
+---
 
-The setting and parameters are the same as the last problem.
-Following is the solution:
+#### KrusellSmithEnv.py
+Implementation of the Krusell-Smith (1998) algorithm for incomplete markets models with aggregate uncertainty. Features:
+- Individual-specific and aggregate shocks
+- Value function iteration
+- Linear approximation of aggregate dynamics
+- Monte Carlo simulation
 
-![image](figures/problem_set_1/q13_v.png)
-![image](figures/problem_set_1/q13_c.png)
-![image](figures/problem_set_1/q13_k.png)
+**Key Classes:**
+- `KrusellSmithEnv`: Main environment class
 
-The red points are the evaluation on the grid points.
+**Key Methods:**
+- `no_agg_risk_VFI()`: VFI without aggregate uncertainty
+- `KS_vfi()`: Full Krusell-Smith algorithm with aggregate uncertainty
+- `solve_approximated_equilibrium()`: Find approximated equilibrium
+- `simulate_aggk()`: Simulate aggregate capital series
+- `forecast_aggk()`: Forecast future aggregate capital
 
-Since the grid width is sufficiently small, it seems that there is not significant difference between the solution 2 methods.
-But the consumption seems to be less smooth in grid search.
-And the first method is more time-consuming.
+---
 
-#### Replication of Table 2 in Kopecky and Suen (2010)
+#### FuncApproxEnv.py
+Environment for comparing different function approximation methods (Problem Set 1, Question 2). Features comparison of:
+- Spline approximation
+- Polynomial approximation
+- Chebyshev approximation
 
-I use the euler method to replicate Table 2 in their paper.
-I compute the first 3 lines by the transition probability matrix.
-The remaining statistics are computed by Monte-Carlo simulation.
-I choose Rowenhorst with 25 grids to be the quasi-exact solution rather than the ChebshevPEA solution in their paper.
-The simulation length is 5,010,000, and the first 10,000 periods are burned.
-Following is the main results.
+**Key Classes:**
+- `FuncApproxEnv`: Main environment class
 
-| index | T(5) | T(10) | T(25) | TH(5) | TH(10) | TH(25) | R(5) | R(10) | R(25) | 
-| :----: | :----: | :----: | :----: | :----: | :----: | :----: | :----: | :----: | :----: | 
-| rho | 0.94898130053 | 0.95585857843 | 0.97727293239 | 0.95844571325 | 1.202396276442 | 1.39588065992 | 0.96024921387 | 0.9942382865 | 1.0 |
-| sigma_epsilon | 0.77923377279 | 1.08625798458 | 1.01065710145 | 0.00063537862 | 1.843916779423 | 2.81707903496 | 0.95959602138 | 0.9918961180 | 1.0 |
-| sigma_a | 1.00004735360 | 0.99999604701 | 0.99999455111 | 2.08977903004 | 1.548634271543 | 1.31392411780 | 1.00001461105 | 0.9999951529 | 1.0 |
-| sigma_k | 0.89806027520 | 1.04680473655 | 1.00942781110 | 0.64053238759 | 0.551646989145 | 0.55513990269 | 1.00001949359 | 1.0000061654 | 1.0 | 
-| sigma_ak | 0.89792725203 | 1.04682151520 | 1.00944041872 | 0.64044090526 | 0.200321072768 | 0.47420857946 | 1.00002105513 | 1.0000066325 | 1.0 | 
-| sigma_y | 0.96437238943 | 1.01645768151 | 1.00331157585 | 0.87612249500 | 0.760124266050 | 0.82846823907 | 1.0000071471 | 1.0000022552 | 1.0 | 
-| sigma_c | 0.98944667059 | 1.00569409138 | 1.00111552301 | 0.96963293461 | 1.054773269722 | 0.99723316786 | 1.00000253118 | 1.0000007945 | 1.0 | 
-| sigma_i | 0.89694175999 | 1.04651655039 | 1.00935186161 | 0.63906937263 | 0.878844868512 | 0.69644647584 | 1.00002184652 | 1.0000068212 | 1.0 | 
-| rho_y | 0.99999999556 | 1.00000000179 | 1.00000000039 | 0.99999997138 | 0.999999782849 | 0.99999991439 | 1.00000000000 | 1.0000000000 | 1.0 | 
+**Key Methods:**
+- `validate()`: Compare approximation methods on test function
 
-The results are similar to Kopecky and Suen's paper.
-In the case of moment approximation, Rowenhorst's performance is best and Tauchen Hussey is the worst.
-As the number of grids increases, Tauchen and Rowenhorst converges to the quasi-exact results.
-The Tauchen Hussay method doesn't converge as the original paper shows.
-The reason may be that Python suffers more from numerical errors than Matlab.
+---
 
-### Question 2
+### Numerical Methods
 
-The main code is in `FuncApproxEnv.py`.
+#### FunctionApprox.py
+Various function approximation techniques for numerical economics.
 
-`FuncApproxEnv().validate(n)`: Compare Spline, Polynomial, and Cherbyshev approximation with `n` grids.
-The approximated function is f(x) = alpha * beta * x ^ alpha, with alpha=0.3 and beta=0.98.
+**Key Classes:**
+- `FunctionApprox`: Base class
+- `ChebyshevApprox`: Chebyshev polynomial approximation (1D)
+- `ChebyshevApprox2D`: 2D Chebyshev approximation
+- `PolynomialApprox`: Polynomial regression
+- `SplineApprox`: Cubic spline interpolation
+- `LinearApprox`: Linear approximation
+- `ExpLogLinearApprox`: Exponential-log linear approximation
 
-The approximation result is following:
+---
 
-![image](figures/problem_set_1/q2_5.png)
-![image](figures/problem_set_1/q2_10.png)
+#### MarkovApprox.py
+Markov chain approximations for AR(1) processes.
 
-The computing time and maximum absolute error is in the following table:
+**Key Classes:**
+- `MarkovApprox`: Base class
+- `Rowenhorst`: Rowenhorst method (exact discretization)
+- `Tauchen`: Tauchen (1986) method
+- `TauchenHussey`: Tauchen-Hussey method
 
-| Method | Spline(5) | Polynomial(5) | Chebyshev(5) | Spline(10) | Polynomial(10) | Chebyshev(10) |
-| :----: | :----: | :----: | :----: | :----: | :----: | :----: |
-| Computational Time | 0.0 | 0.0009911060333 | 0.0 | 0.0 | 0.0 | 0.0010030 |
-| Maximum Absolute Error | 0.161465698189 | 0.1287999140712 | 0.1579644117 | 0.12678461317 | 0.091126894848 | 0.10377239873|
+**Key Functions:**
+- `markov_moments()`: Compute moments of Markov chain
 
-The computional time is neglectable since the number of basis function is small.
+---
 
-Chebyshev and Polynomial approximation can capture the curvature of the function, so both of them perform better than Spline in term of errors.
-This function is kind of ill-behaved because that its all order of derivatives is infinite at 0, so the information at 0 is important.
-Because Chebyshev approximation doesn't take grids at the endpoints, so there is a large error at 0. 
+#### RandomProcess.py
+Simulation of stochastic processes.
 
-### Question 3
+**Key Classes:**
+- `MarkovProcess`: Base class
+- `AR1Process`: AR(1) process simulation
+- `FiniteMarkov`: Finite state Markov chain
 
-The simulation path and the decision rule given the original parameters is:
+---
 
-![image](figures/problem_set_1/q3_1_p.png)
-![image](figures/problem_set_1/q3_1_d.png)
+### Utilities
 
-The remaining capital line is y = (1 - delta) * k.
-All the variables are normalized by steady states.
+#### utilize.py
+Helper functions for output generation.
 
-The simulation path and the decision rule given b=0.1 is:
+**Functions:**
+- `write_markdown_table()`: Generate markdown tables
+- `write_latex_table()`: Generate LaTeX tables
+- `gen_time_series_moments()`: Compute time series moments
+- `compute_gini()`: Calculate Gini coefficient
 
-![image](figures/problem_set_1/q3_2_p.png)
-![image](figures/problem_set_1/q3_2_d.png)
+---
 
-The simulation path and the decision rule given phi=0.03 is:
+#### menu_cost.py
+Menu cost model implementation.
 
-![image](figures/problem_set_1/q3_3_p.png)
-![image](figures/problem_set_1/q3_3_d.png)
+**Key Classes:**
+- `MenuCostEnv`: Main environment class
+- `MenuCostVFIRes`: Results container
 
-The simulation path and the decision rule given b=0.01 and phi=0.03 is:
+**Key Methods:**
+- `vfi()`: Value function iteration
+- `simulate()`: Simulate price dynamics
+- `hazard_function()`: Compute hazard rates
 
-![image](figures/problem_set_1/q3_4_p.png)
-![image](figures/problem_set_1/q3_4_d.png)
+---
 
-It seems that the irreversibility constraint is never binding with the original parameters.
-So the solution to the OBC problem is similar to the problem with no constraint.
+## Problem Sets
 
-![image](figures/problem_set_1/q3_5_p.png)
-![image](figures/problem_set_1/q3_5_d.png)
+### Problem Set 1: Optimal Growth & Function Approximation
 
-Since the correlation between state variables c[t-1] and k[t] is high, only k[t] is used in PEA.
+**Question 1: Solow Growth Model**
+- Solves optimal growth model with AR(1) TFP using Chebyshev approximation
+- Compares grid search vs. Euler equation methods
+- Replicates Table 2 in Kopecky and Suen (2010)
+- Key finding: Rowenhorst discretization performs best
 
-Comparing the results in the first 2 problems, we can see that the dispersion of investment is larger if the habit coefficient is higher.
-This result shows that the habit utility can smooth the consumption path by increasing the volatility of investment.
+**Question 2: Function Approximation Comparison**
+- Compares Spline, Polynomial, and Chebyshev methods
+- Test function: f(x) = αβx^α with α=0.3, β=0.98
+- Chebyshev and Polynomial capture curvature better than Spline
 
-Comparing the results in the problem 1 and problem 3, we can see that the dispersion of capital is larger if the investment adjustment cost is smaller.
-This result shows that the investment adjustment cost smooth the capital path.
+**Question 3: Habit Formation & Investment Adjustment Costs**
+- Growth model with internal/external habit formation
+- Investment adjustment costs (IAC)
+- Analyzes policy functions under different parameter values
 
-The fourth results mix the 2 channels. 
+---
 
-The above results are based on PEA with the first order, i.e. the expectation only dependent on log(k) and log(a).
-When the second order term log(k)log(a), log(k)^2, log(a)^2, are added to the regression, the regression became unstable.
-Below is the path of the coefficient of constant.
+### Problem Set 2: Stochastic Optimal Growth
 
-![image](figures/problem_set_1/q3_ho.png)
+Compares four numerical methods for solving stochastic optimal growth:
 
-We can see the coefficient doesn't converge.
-The overall R^2 is high, so I think there is not much curvature to be captured by higher order terms.
-The graph of decision rule also shows that the decision rule is almost linear.
+| Method | σ(y) | σ(c) | σ(i) | 
+|:------:|:----:|:----:|:----:|
+| VFI | 0.205 | 0.138 | 0.071 |
+| Chebyshev | 0.148 | 0.096 | 0.055 |
+| Modified PEA | 0.120 | 0.076 | 0.046 |
+| EGM | 0.157 | 0.105 | 0.054 |
 
-## Problem Set 2
+All methods show high correlation between model variables but underestimate real-world volatility.
 
-| a | mean | min | max |
-| :----: | :----: | :----: | :----: |
-| -0.07 | -3.011 | -5.237 | -1.807 |
-| -0.03 | -3.164 | -6.12 | -1.831 |
-| 0.0 | -3.224 | -6.261 | -1.856 |
-| 0.03 | -3.194 | -6.14 | -1.875 |
-| 0.07 | -3.068 | -5.468 | -1.903 |
+---
 
-| a | mean | min | max |
-| :----: | :----: | :----: | :----: |
-| -0.07 | -6.895 | -10.193 | -5.863 |
-| -0.03 | -6.913 | -9.012 | -5.869 |
-| 0.0 | -6.982 | -9.371 | -5.845 |
-| 0.03 | -6.932 | -9.817 | -5.93 |
-| 0.07 | -6.885 | -9.32 | -5.87 |
+### Problem Set 3: Huggett (1996) Model
 
-| index | VFI | Chebyshev Approximation | modified PEA | EGM | Real |
-| :----: | :----: | :----: | :----: | :----: | :----: |
-| sigma y | 0.2048 | 0.1483 | 0.12 | 0.1574 | 1.8 |
-| sigma c | 0.1376 | 0.0955 | 0.0764 | 0.1052 | 1.3 |
-| sigma i | 0.0708 | 0.0553 | 0.0455 | 0.0538 | 5.1 |
-| corr(y, c) | 0.9914 | 0.9907 | 0.9907 | 0.9949 | 0.739 |
-| corr(y, i) | 0.9671 | 0.9719 | 0.9735 | 0.9802 | 0.714 |
-| corr(c, i) | 0.9254 | 0.9307 | 0.9333 | 0.955 | -100.0 |
-| mean(k) | 39.8387 | 38.097 | 38.5668 | 36.0167 | -100.0 |
-| mean(c) | 2.8463 | 2.7563 | 2.7826 | 2.6438 | -100.0 |
-| mean(y) | 3.8389 | 3.706 | 3.7454 | 3.5434 | -100.0 |
-| mean(i) | 0.9927 | 0.9497 | 0.9627 | 0.8996 | -100.0 |
-| autocorr(y) | 0.997 | 0.991 | 0.9914 | 0.9964 | -100.0 |
-| autocorr(c) | 0.9978 | 0.9952 | 0.9953 | 0.9982 | -100.0 |
-| autocorr(i) | 0.9903 | 0.9816 | 0.9831 | 0.9914 | -100.0 |
-| autocorr(a) | 0.992 | 0.9803 | 0.9817 | 0.9906 | -100.0 |
+Life-cycle model with incomplete markets:
+- 79 periods, retirement at age 54
+- Borrowing constraint (a ≥ 0)
+- Pension system
+- Stationary equilibrium computation
+
+**Key Results:**
+- Aggregate capital: K = 3.73
+- Wealth Gini: 0.577 (underestimates US inequality)
+- Top 1% holds 7.8% of wealth (vs 28% in US data)
+
+**Comparative Statics:**
+- Lower population growth → lower output, higher capital
+- Welfare effects largest for working-age cohorts
+
+---
+
+### Final Project: Income and Wealth Dynamics
+
+Analyzes income and wealth dynamics using the Krusell-Smith model framework:
+- Forecast analysis (1, 10, 50 periods ahead)
+- Income and wealth distributions
+- Gini coefficients, moments, and inequality measures
+
+**Generated Figures:**
+- `forecast_*.png`: Forecasts at different horizons
+- `gini_*.png`: Gini coefficients over time
+- `policy_*.png`: Policy functions
+- `mean_*.png`, `variance_*.png`: Distribution moments
+- `skewness_*.png`, `kurtosis_*.png`: Higher-order moments
+
+---
+
+## Installation
+
+### Dependencies
+```bash
+numpy
+scipy
+matplotlib
+pandas
+```
+
+Install via:
+```bash
+pip install numpy scipy matplotlib pandas
+```
+
+## Usage
+
+Run specific problem sets:
+```bash
+# Problem Set 1
+python main.py
+
+# Problem Set 2
+python problem_set_2.py
+
+# Problem Set 3
+python problem_set_3.py
+```
+
+Or import modules directly:
+```python
+from OptimalGrowth import OptimalGrowthEnv
+from Huggett1996Env import Huggett1996Env
+from FunctionApprox import ChebyshevApprox
+
+# Example: Solve optimal growth model
+env = OptimalGrowthEnv()
+env.euler_method(n_k=15, n_a=7)
+env.plot_policy()
+```
+
+---
+
+## References
+
+1. Kopecky, K.A., & Suen, R.M.H. (2010). Finite State Markov-Chain Approximations to Highly Persistent AR(1) Processes. *Journal of Economic Dynamics and Control*.
+
+2. Huggett, M. (1996). Wealth Distribution in Life-Cycle Economies. *Journal of Monetary Economics*.
+
+3. Krusell, P., & Smith, A.A. (1998). Income and Wealth Heterogeneity in the Macroeconomy. *Journal of Political Economy*.
+
+4. Tauchen, G. (1986). Finite State Markov-Chain Approximations to Univariate and Vector Autoregressions. *Economics Letters*.
+
+5. Rowenhorst, D. (1995). A Exact Procedure for Evaluating Markovian Aggregate Real Business Cycle Models. *Review of Economic Studies*.
+
